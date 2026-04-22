@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Your Collection — DustyShelf</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { parchment: '#FDFCF8', ink: '#1A1A1A', forest: '#1A3C34', gold: '#B8860B', clay: '#7D6B5D' },
+          fontFamily: { serif: ['"Playfair Display"', 'serif'], sans: ['Inter', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-parchment text-ink min-h-screen">
+  <!-- Page protection -->
+  <script>
+    if(localStorage.getItem("loggedIn") !== "true"){
+      window.location.href = "login.html";
+    }
+  </script>
+
+  <!-- Navigation -->
+  <nav class="bg-parchment border-b border-gray-100">
+    <div class="max-w-5xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href="index.html" class="serif text-xl font-black tracking-tighter">Dusty<span class="italic font-normal">Shelf</span></a>
+      <a href="index.html" class="text-[10px] font-black uppercase tracking-widest text-clay hover:text-ink transition-colors">← Keep Browsing</a>
+    </div>
+  </nav>
+
+  <main class="max-w-5xl mx-auto px-6 py-16">
+    <div class="mb-12">
+      <h1 class="serif text-5xl font-bold text-forest mb-2">Your Collection</h1>
+      <p class="text-clay italic">Review the items you've curated for purchase.</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-16">
+      
+      <!-- List -->
+      <div class="lg:col-span-2 space-y-10">
+        <div id="cart-items" class="divide-y divide-gray-100"></div>
+        
+        <div id="empty-cart" class="hidden py-20 text-center bg-white/50 rounded-[2rem] border border-gray-100">
+          <p class="serif italic text-2xl text-clay mb-6">Your collection is empty.</p>
+          <a href="index.html" class="bg-forest text-parchment px-10 py-4 rounded-full font-bold text-xs uppercase tracking-widest shadow-xl shadow-forest/10">Browse the Library</a>
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <div id="order-summary" class="hidden">
+        <div class="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm sticky top-8">
+          <h2 class="serif text-2xl font-bold text-forest mb-6">Summary</h2>
+          <div class="space-y-4 text-sm mb-8">
+            <div class="flex justify-between text-clay">
+              <span>Subtotal</span>
+              <span id="subtotal" class="text-ink font-bold">₹0</span>
+            </div>
+            <div class="flex justify-between text-clay">
+              <span>Curation & Shipping</span>
+              <span class="text-forest font-bold uppercase text-[10px] tracking-widest">Complimentary</span>
+            </div>
+            <div class="border-t border-gray-50 pt-4 flex justify-between text-xl font-bold text-forest">
+              <span>Total</span>
+              <span id="total">₹0</span>
+            </div>
+          </div>
+          <a href="checkout.html" class="block w-full text-center bg-forest text-parchment py-4 rounded-full font-bold text-xs uppercase tracking-widest hover:scale-[1.02] transition-all shadow-xl shadow-forest/10">
+            Secure Checkout
+          </a>
+          <p class="text-center text-[10px] text-clay/60 uppercase tracking-widest font-bold mt-6 italic">Secure payment processing</p>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    function getCart(){ return JSON.parse(localStorage.getItem("dustyshelf_cart") || "[]"); }
+    function saveCart(cart){ localStorage.setItem("dustyshelf_cart", JSON.stringify(cart)); render(); }
+
+    function render(){
+      const cart = getCart();
+      const itemsEl = document.getElementById("cart-items");
+      const emptyEl = document.getElementById("empty-cart");
+      const summaryEl = document.getElementById("order-summary");
+
+      const total = cart.reduce((s,i) => s + i.price * i.qty, 0);
+      document.getElementById("subtotal").textContent = `₹${total}`;
+      document.getElementById("total").textContent = `₹${total}`;
+
+      if(!cart.length){
+        emptyEl.classList.remove("hidden");
+        summaryEl.classList.add("hidden");
+        itemsEl.innerHTML = "";
+        return;
+      }
+
+      emptyEl.classList.add("hidden");
+      summaryEl.classList.remove("hidden");
+
+      itemsEl.innerHTML = cart.map(item => `
+        <div class="py-8 flex gap-8 group">
+          <div class="w-24 aspect-[3/4] bg-gray-50 rounded-xl overflow-hidden shadow-md shrink-0">
+            <img src="${item.cover}" class="w-full h-full object-cover grayscale-[0.2]" onerror="this.src='https://via.placeholder.com/200x300/FDFCF8/1A3C34?text=📚'" />
+          </div>
+          <div class="flex-1 flex flex-col justify-between">
+            <div class="flex justify-between items-start">
+              <div>
+                <h3 class="serif text-xl font-bold text-forest mb-1">${item.title}</h3>
+                <p class="text-clay italic text-sm">${item.author}</p>
+              </div>
+              <button onclick="removeItem('${item.id}')" class="text-clay hover:text-red-400 transition-colors p-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <div class="flex items-center justify-between mt-6">
+              <div class="flex items-center gap-4 bg-white px-4 py-2 rounded-full border border-gray-100">
+                <button onclick="updateQty('${item.id}', -1)" class="text-clay hover:text-ink font-bold">−</button>
+                <span class="text-sm font-bold w-4 text-center">${item.qty}</span>
+                <button onclick="updateQty('${item.id}', 1)" class="text-clay hover:text-ink font-bold">+</button>
+              </div>
+              <p class="serif text-xl font-bold text-forest">₹${item.price * item.qty}</p>
+            </div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    window.removeItem = (id) => {
+      const cart = getCart().filter(i => i.id !== id);
+      saveCart(cart);
+    };
+
+    window.updateQty = (id, delta) => {
+      const cart = getCart();
+      const item = cart.find(i => i.id === id);
+      if(item){
+        item.qty += delta;
+        if(item.qty < 1) return removeItem(id);
+        saveCart(cart);
+      }
+    };
+
+    render();
+  </script>
+</body>
+</html>

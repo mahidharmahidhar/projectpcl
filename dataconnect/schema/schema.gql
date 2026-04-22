@@ -1,0 +1,57 @@
+type User @table {
+  username: String!
+  email: String!
+  createdAt: Timestamp!
+  firstName: String
+  lastName: String
+  profilePictureUrl: String
+  averageRating: Float
+}
+
+type Book @table {
+  title: String!
+  author: String!
+  ISBN: String!
+  genre: String
+  publicationYear: Int
+  description: String
+  coverImageUrl: String
+}
+
+type Listing @table {
+  seller: User!
+  book: Book!
+  condition: String!
+  price: Float!
+  createdAt: Timestamp!
+  status: String!
+  description: String
+  photos: [String]
+}
+
+type Offer @table {
+  listing: Listing!
+  buyer: User!
+  offeredPrice: Float!
+  createdAt: Timestamp!
+  status: String!
+}
+
+type Transaction @table {
+  listing: Listing!
+  offer: Offer!
+  buyer: User!
+  seller: User!
+  finalPrice: Float!
+  transactionDate: Timestamp!
+  buyerRating: Int
+  sellerRating: Int
+}
+
+type Message @table {
+  sender: User!
+  receiver: User!
+  content: String!
+  sentAt: Timestamp!
+  listing: Listing
+}

@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DustyShelf — Curated Second-Hand Classics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            parchment: '#FDFCF8',
+            ink: '#1A1A1A',
+            forest: '#1A3C34',
+            gold: '#B8860B',
+            clay: '#7D6B5D',
+          },
+          fontFamily: {
+            serif: ['"Playfair Display"', 'serif'],
+            sans: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background-color: #FDFCF8; color: #1A1A1A; font-family: 'Inter', sans-serif; }
+    .serif { font-family: 'Playfair Display', serif; }
+    .book-card { transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); border-bottom: 1px solid transparent; }
+    .book-card:hover { transform: translateY(-8px); border-bottom-color: #B8860B; }
+    .nav-link::after { content: ''; position: absolute; width: 0; height: 1px; bottom: -2px; left: 0; background-color: #B8860B; transition: width 0.3s; }
+    .nav-link:hover::after { width: 100%; }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #FDFCF8; }
+    ::-webkit-scrollbar-thumb { background: #D1D1D1; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #B8860B; }
+  </style>
+</head>
+
+<body class="bg-parchment text-ink min-h-screen">
+  <!-- Page protection -->
+  <script>
+    if(localStorage.getItem("loggedIn") !== "true"){
+      window.location.href = "login.html";
+    }
+  </script>
+
+  <!-- ── Navigation ──────────────────────────────────────────────────────────── -->
+  <nav class="sticky top-0 z-50 bg-parchment/90 backdrop-blur-md border-b border-gray-100">
+    <div class="max-w-7xl mx-auto px-6 lg:px-12 h-20 flex items-center justify-between">
+      <!-- Logo -->
+      <a href="index.html" class="serif text-2xl font-black tracking-tighter flex items-center gap-2">
+        <span class="text-gold">📖</span>
+        <span>Dusty<span class="italic font-normal">Shelf</span></span>
+      </a>
+
+      <!-- Desktop Links -->
+      <div class="hidden md:flex items-center gap-10 text-[13px] uppercase tracking-[0.2em] font-semibold text-clay">
+        <a href="index.html" class="nav-link relative text-ink">Collection</a>
+        <a href="#about" class="nav-link relative">Our Story</a>
+        <a id="admin-link" href="admin.html" class="hidden nav-link relative text-forest font-bold">Admin Panel</a>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex items-center gap-6">
+        <div class="hidden lg:flex items-center bg-gray-50 border border-gray-100 rounded-full px-4 py-1.5 focus-within:border-gold transition-all">
+          <input id="search-input" type="text" placeholder="Search classics..." class="bg-transparent text-sm w-32 outline-none italic" />
+          <svg class="w-4 h-4 text-clay" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </div>
+        
+        <a href="cart.html" class="relative group">
+          <svg class="w-6 h-6 text-ink group-hover:text-gold transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+          <span id="cart-badge" class="absolute -top-2 -right-2 bg-forest text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-parchment" style="display:none">0</span>
+        </a>
+
+        <button onclick="logout()" class="group flex items-center gap-2 text-clay hover:text-ink transition-colors">
+          <span id="user-email" class="hidden sm:block text-xs font-medium"></span>
+          <svg class="w-5 h-5 opacity-60 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── Hero Section ───────────────────────────────────────────────────────── -->
+  <section class="relative overflow-hidden pt-16 pb-24 border-b border-gray-50">
+    <div class="max-w-7xl mx-auto px-6 lg:px-12 grid lg:grid-cols-2 gap-16 items-center">
+      <div>
+        <span class="serif italic text-gold text-xl mb-4 block">Est. 2024</span>
+        <h1 class="serif text-5xl lg:text-7xl font-bold leading-[1.1] mb-8 text-forest">
+          Where every page <br/>
+          <span class="italic font-normal">holds a memory.</span>
+        </h1>
+        <p class="text-clay text-lg max-w-md leading-relaxed mb-10">
+          Curating a rare collection of pre-loved literature, first editions, and forgotten stories for the modern bibliophile.
+        </p>
+        <div class="flex items-center gap-6">
+          <a href="#collection" class="bg-forest text-parchment px-10 py-4 rounded-full font-semibold hover:bg-ink transition-all shadow-xl shadow-forest/10">
+            Explore Collection
+          </a>
+          <a href="#about" class="serif italic border-b border-ink/20 hover:border-gold transition-all py-1">
+            Read our mission
+          </a>
+        </div>
+      </div>
+      <div class="relative">
+        <div class="aspect-[4/5] bg-gray-100 rounded-3xl overflow-hidden shadow-2xl rotate-2">
+          <img src="https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=1000&auto=format&fit=crop" class="w-full h-full object-cover grayscale-[0.2]" alt="Vintage Books" />
+        </div>
+        <div class="absolute -bottom-8 -left-8 bg-gold p-8 rounded-2xl shadow-xl -rotate-3 hidden md:block">
+          <p class="serif text-parchment text-2xl font-bold italic">“Books are a uniquely portable magic.”</p>
+          <p class="text-parchment/80 text-xs mt-2 uppercase tracking-widest font-bold">— Stephen King</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Shop Collection ────────────────────────────────────────────────────── -->
+  <main id="collection" class="max-w-7xl mx-auto px-6 lg:px-12 py-24">
+    
+    <!-- Filter Bar -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
+      <div>
+        <h2 class="serif text-4xl font-bold text-forest mb-2">The Library</h2>
+        <p class="text-clay italic">Filtered selection of our finest second-hand editions</p>
+      </div>
+      <div id="categories" class="flex gap-4 overflow-x-auto pb-2 no-scrollbar"></div>
+    </div>
+
+    <!-- Grid -->
+    <div id="book-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-10 gap-y-20"></div>
+
+    <div id="no-results" class="hidden text-center py-32">
+      <div class="serif italic text-4xl text-clay mb-4">Finis.</div>
+      <p class="text-clay/60 uppercase tracking-widest text-xs font-bold">No editions found matching your request</p>
+    </div>
+  </main>
+
+  <!-- ── Testimonials ───────────────────────────────────────────────────────── -->
+  <section class="bg-parchment py-24 border-y border-gray-50">
+    <div class="max-w-7xl mx-auto px-6 lg:px-12">
+      <div class="grid md:grid-cols-3 gap-12">
+        <div class="text-center p-8 bg-white/40 rounded-3xl border border-gray-100">
+          <div class="text-gold text-2xl mb-4">“</div>
+          <p class="serif italic text-xl text-forest mb-6">"The condition of the books is exceptional. Truly a gem for rare book hunters."</p>
+          <p class="text-xs font-bold uppercase tracking-widest text-clay">— Eleanor V.</p>
+        </div>
+        <div class="text-center p-8 bg-white/40 rounded-3xl border border-gray-100">
+          <div class="text-gold text-2xl mb-4">“</div>
+          <p class="serif italic text-xl text-forest mb-6">"Fast delivery and beautiful eco-friendly packaging. I'm in love with this brand."</p>
+          <p class="text-xs font-bold uppercase tracking-widest text-clay">— Julian R.</p>
+        </div>
+        <div class="text-center p-8 bg-white/40 rounded-3xl border border-gray-100">
+          <div class="text-gold text-2xl mb-4">“</div>
+          <p class="serif italic text-xl text-forest mb-6">"Finding an out-of-print classic here was the highlight of my month!"</p>
+          <p class="text-xs font-bold uppercase tracking-widest text-clay">— Sarah M.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Newsletter ─────────────────────────────────────────────────────────── -->
+  <section class="max-w-7xl mx-auto px-6 lg:px-12 py-24">
+    <div class="bg-forest rounded-[3rem] p-12 lg:p-20 text-center text-parchment relative overflow-hidden">
+      <div class="relative z-10">
+        <h2 class="serif text-4xl lg:text-5xl font-bold mb-6">Join The Literati</h2>
+        <p class="text-parchment/70 max-w-lg mx-auto mb-10 text-lg">Subscribe to our monthly journal and be the first to know about new collection arrivals.</p>
+        <div class="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
+          <input type="email" placeholder="Your email address" class="flex-1 bg-white/10 border border-white/20 rounded-full px-6 py-4 outline-none focus:border-gold transition-all placeholder:text-parchment/40" />
+          <button class="bg-gold text-parchment px-10 py-4 rounded-full font-bold hover:scale-105 transition-all">Subscribe</button>
+        </div>
+      </div>
+      <!-- Decorative circle -->
+      <div class="absolute -top-20 -right-20 w-64 h-64 bg-gold/10 rounded-full blur-3xl"></div>
+    </div>
+  </section>
+
+  <!-- ── Footer ─────────────────────────────────────────────────────────────── -->
+  <footer class="bg-parchment border-t border-gray-100 py-16">
+    <div class="max-w-7xl mx-auto px-6 lg:px-12 grid grid-cols-1 md:grid-cols-4 gap-12">
+      <div class="md:col-span-1">
+        <a href="#" class="serif text-2xl font-black tracking-tighter mb-6 block">Dusty<span class="italic font-normal">Shelf</span></a>
+        <p class="text-clay text-sm leading-relaxed">Honoring the heritage of literature through curation and sustainability.</p>
+      </div>
+      <div>
+        <h4 class="text-xs font-bold uppercase tracking-[0.2em] mb-6">Collection</h4>
+        <ul class="space-y-3 text-sm text-clay">
+          <li><a href="#" class="hover:text-gold transition-colors">Fiction</a></li>
+          <li><a href="#" class="hover:text-gold transition-colors">Classics</a></li>
+          <li><a href="#" class="hover:text-gold transition-colors">Rare Editions</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-xs font-bold uppercase tracking-[0.2em] mb-6">Company</h4>
+        <ul class="space-y-3 text-sm text-clay">
+          <li><a href="#" class="hover:text-gold transition-colors">Our Story</a></li>
+          <li><a href="#" class="hover:text-gold transition-colors">Sustainability</a></li>
+          <li><a href="#" class="hover:text-gold transition-colors">Contact</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-xs font-bold uppercase tracking-[0.2em] mb-6">Legal</h4>
+        <ul class="space-y-3 text-sm text-clay">
+          <li><a href="#" class="hover:text-gold transition-colors">Privacy</a></li>
+          <li><a href="#" class="hover:text-gold transition-colors">Terms</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="max-w-7xl mx-auto px-6 lg:px-12 mt-16 pt-8 border-t border-gray-50 flex justify-between items-center text-[10px] text-clay/60 font-bold uppercase tracking-widest">
+      <p>© 2024 DUSTYSHELF COLLECTIVE</p>
+      <div class="flex gap-6">
+        <span>INSTAGRAM</span>
+        <span>TWITTER</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ── Fetch Books from Firestore ──────────────────────────────────────────
+    import { db } from "./js/firebase-config.js";
+    import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    let BOOKS = [];
+
+    async function fetchBooks() {
+      const grid = document.getElementById("book-grid");
+      const noRes = document.getElementById("no-results");
+
+      try {
+        const q = query(collection(db, "books"), orderBy("createdAt", "desc"));
+        const snap = await getDocs(q);
+        
+        BOOKS = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        
+        if (BOOKS.length === 0) {
+          // Fallback if DB is empty: use a few demo books
+          BOOKS = [
+            { id:"b1", title:"The Midnight Library", author:"Matt Haig", category:"Fiction", price:129, originalPrice:499, cover:"https://covers.openlibrary.org/b/id/10527843-L.jpg", condition:"Good" },
+            { id:"b2", title:"Atomic Habits", author:"James Clear", category:"Self-Help", price:159, originalPrice:599, cover:"https://covers.openlibrary.org/b/id/10286124-L.jpg", condition:"Like New" }
+          ];
+        }
+        
+        renderBooks();
+      } catch (err) {
+        console.error("Error fetching books:", err);
+        // Load fallback data if Firebase fails (missing keys)
+        renderBooks();
+      }
+    }
+
+    const CATEGORIES = ["All", "Fiction", "Classic", "Non-Fiction", "Self-Help", "Fantasy", "Sci-Fi", "Academic", "Biography"];
+
+    // ── State ─────────────────────────────────────────────────────────────────
+    let activeCategory = "All";
+    let searchQuery = "";
+
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    if(storedUser){
+      document.getElementById("user-email").textContent = storedUser.email.split('@')[0];
+      if(storedUser.email === "admin@dustyshelf.com") {
+        document.getElementById("admin-link").classList.remove("hidden");
+      }
+    }
+
+    function logout(){
+      localStorage.removeItem("loggedIn");
+      alert("Logged out!");
+      window.location.href = "login.html";
+    }
+
+    function getCart(){ return JSON.parse(localStorage.getItem("dustyshelf_cart") || "[]"); }
+    function saveCart(cart){ localStorage.setItem("dustyshelf_cart", JSON.stringify(cart)); updateCartBadge(); }
+
+    function addToCart(book){
+      const cart = getCart();
+      const idx = cart.findIndex(i => i.id === book.id);
+      if(idx > -1){ cart[idx].qty += 1; }
+      else { cart.push({ ...book, qty:1 }); }
+      saveCart(cart);
+      alert(`"${book.title}" added to your collection!`);
+    }
+
+    function updateCartBadge(){
+      const cart = getCart();
+      const badge = document.getElementById("cart-badge");
+      const count = cart.reduce((s,i) => s + i.qty, 0);
+      if(count > 0){ badge.style.display = "flex"; badge.textContent = count; }
+      else { badge.style.display = "none"; }
+    }
+    updateCartBadge();
+
+    // ── Categories ────────────────────────────────────────────────────────────
+    const catContainer = document.getElementById("categories");
+    CATEGORIES.forEach(label => {
+      const btn = document.createElement("button");
+      btn.className = `shrink-0 text-xs font-bold uppercase tracking-widest px-6 py-2 rounded-full border transition-all ${label === "All" ? "bg-forest text-parchment border-forest" : "text-clay border-transparent hover:text-ink"}`;
+      btn.textContent = label;
+      btn.addEventListener("click", () => {
+        document.querySelectorAll("#categories button").forEach(b => {
+          b.className = "shrink-0 text-xs font-bold uppercase tracking-widest px-6 py-2 rounded-full border border-transparent text-clay hover:text-ink transition-all";
+        });
+        btn.className = "shrink-0 text-xs font-bold uppercase tracking-widest px-6 py-2 rounded-full border bg-forest text-parchment border-forest";
+        activeCategory = label;
+        renderBooks();
+      });
+      catContainer.appendChild(btn);
+    });
+
+    // ── Search ────────────────────────────────────────────────────────────────
+    document.getElementById("search-input").addEventListener("input", (e) => {
+      searchQuery = e.target.value.toLowerCase(); renderBooks();
+    });
+
+    // ── Render books ──────────────────────────────────────────────────────────
+    function renderBooks(){
+      const grid = document.getElementById("book-grid");
+      const noRes = document.getElementById("no-results");
+
+      const filtered = BOOKS.filter(b => {
+        const matchCat = activeCategory === "All" || b.category === activeCategory;
+        const matchSearch = !searchQuery || b.title.toLowerCase().includes(searchQuery) || b.author.toLowerCase().includes(searchQuery);
+        return matchCat && matchSearch;
+      });
+
+      if(!filtered.length){ grid.innerHTML = ""; noRes.classList.remove("hidden"); return; }
+      noRes.classList.add("hidden");
+
+      grid.innerHTML = filtered.map(book => `
+        <div class="book-card group cursor-pointer">
+          <div class="relative aspect-[3/4] overflow-hidden rounded-2xl bg-gray-50 mb-6">
+            <img src="${book.cover}" alt="${book.title}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale-[0.3] group-hover:grayscale-0" onerror="this.src='https://via.placeholder.com/400x600/FDFCF8/1A3C34?text=📚'" />
+            <div class="absolute inset-0 bg-forest/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <button class="add-btn bg-parchment text-forest px-6 py-3 rounded-full text-xs font-bold uppercase tracking-widest hover:scale-105 transition-all shadow-xl" data-id="${book.id}">
+                Add to Cart
+              </button>
+            </div>
+          </div>
+          <div class="text-center">
+            <h3 class="serif text-xl font-bold text-forest line-clamp-1 mb-1">${book.title}</h3>
+            <p class="text-clay italic text-xs mb-3">${book.author}</p>
+            <div class="flex items-center justify-center gap-2">
+              <span class="text-ink font-semibold">₹${book.price}</span>
+              <span class="text-clay/50 text-[10px] line-through font-bold uppercase">₹${book.originalPrice}</span>
+            </div>
+          </div>
+        </div>
+      `).join("");
+
+      grid.querySelectorAll(".add-btn").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          const book = BOOKS.find(b => b.id === btn.dataset.id);
+          if(book) addToCart(book);
+        });
+      });
+    }
+
+    fetchBooks();
+  </script>
+
+</body>
+</html>

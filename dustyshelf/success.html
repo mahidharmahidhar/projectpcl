@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gratitude — DustyShelf</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { parchment: '#FDFCF8', ink: '#1A1A1A', forest: '#1A3C34', gold: '#B8860B', clay: '#7D6B5D' },
+          fontFamily: { serif: ['"Playfair Display"', 'serif'], sans: ['Inter', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-parchment text-ink min-h-screen flex items-center justify-center p-8">
+
+  <div class="max-w-xl w-full text-center">
+    <div class="serif italic text-gold text-7xl mb-12">Grazie.</div>
+    
+    <div class="bg-white p-12 rounded-[4rem] border border-gray-100 shadow-sm mb-12">
+      <h1 class="serif text-5xl font-bold text-forest mb-6">Your order is <br/>being prepared.</h1>
+      <p class="text-clay text-lg mb-10 leading-relaxed italic">The stories you've chosen are currently being curated and packaged with care for their next journey.</p>
+      
+      <div id="summary" class="bg-parchment p-8 rounded-3xl border border-gray-50 text-left mb-8">
+        <p class="text-[10px] font-black uppercase tracking-widest text-clay mb-4">Brief Summary</p>
+        <div id="item-list" class="space-y-2 mb-4"></div>
+        <div class="border-t border-gray-100 pt-4 flex justify-between font-bold text-forest serif text-xl">
+          <span>Amount Paid</span>
+          <span id="paid">₹0</span>
+        </div>
+      </div>
+
+      <a href="index.html" class="inline-block bg-forest text-parchment px-12 py-4 rounded-full font-bold text-xs uppercase tracking-widest hover:scale-105 transition-all shadow-xl shadow-forest/10">
+        Return to the Library
+      </a>
+    </div>
+
+    <p class="text-clay/60 text-[10px] font-bold uppercase tracking-[0.3em]">DustyShelf Collective — Est. 2024</p>
+  </div>
+
+  <script>
+    const lastOrder = JSON.parse(localStorage.getItem("last_order"));
+    if(lastOrder){
+      document.getElementById("paid").textContent = `₹${lastOrder.total}`;
+      document.getElementById("item-list").innerHTML = lastOrder.items.map(i => `
+        <div class="flex justify-between text-xs">
+          <span class="text-clay italic truncate pr-4">${i.title} × ${i.qty}</span>
+          <span class="font-bold">₹${i.price * i.qty}</span>
+        </div>
+      `).join("");
+    } else {
+      window.location.href = "index.html";
+    }
+  </script>
+</body>
+</html>

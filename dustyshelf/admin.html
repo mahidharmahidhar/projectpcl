@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DustyShelf Admin</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .nav-item { transition: all 0.2s; }
+    .nav-item.active, .nav-item:hover { background: rgba(255,255,255,0.1); }
+    .section { display: none; }
+    .section.active { display: block; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
+  </style>
+</head>
+<body class="bg-gray-950 text-white">
+
+<!-- Access Control -->
+<script>
+  const _u = JSON.parse(localStorage.getItem("user"));
+  const ADMIN = "admin@dustyshelf.com";
+  if(!localStorage.getItem("loggedIn") || !_u || _u.email !== ADMIN){
+    alert("Admins only!"); window.location.href = "login.html";
+  }
+</script>
+
+<div class="flex h-screen overflow-hidden">
+  <!-- ── Sidebar ─────────────────────────────────────────────────────── -->
+  <aside class="w-64 bg-gray-900 border-r border-gray-800 flex flex-col shrink-0">
+    <div class="p-6 border-b border-gray-800">
+      <h1 class="text-xl font-black">📚 DustyShelf</h1>
+      <p class="text-xs text-gray-500 mt-1 uppercase tracking-widest">Admin Panel</p>
+    </div>
+
+    <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+      <button onclick="showSection('dashboard')" class="nav-item active w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-3" id="nav-dashboard">
+        <span>📊</span> Dashboard
+      </button>
+      <button onclick="showSection('books')" class="nav-item w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-3" id="nav-books">
+        <span>📖</span> Manage Books
+      </button>
+      <button onclick="showSection('orders')" class="nav-item w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-3" id="nav-orders">
+        <span>📦</span> Orders
+      </button>
+      <button onclick="showSection('analytics')" class="nav-item w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-3" id="nav-analytics">
+        <span>📈</span> Analytics
+      </button>
+    </nav>
+
+    <div class="p-4 border-t border-gray-800">
+      <div class="flex items-center gap-3 mb-3">
+        <div class="w-9 h-9 rounded-full bg-green-600 flex items-center justify-center text-sm font-bold">A</div>
+        <div>
+          <p class="text-sm font-bold">Admin</p>
+          <p class="text-[10px] text-gray-500">admin@dustyshelf.com</p>
+        </div>
+      </div>
+      <button onclick="logout()" class="w-full text-xs text-gray-500 hover:text-red-400 transition-colors py-2 text-left">
+        → Logout
+      </button>
+    </div>
+  </aside>
+
+  <!-- ── Main Content ────────────────────────────────────────────────── -->
+  <div class="flex-1 flex flex-col overflow-hidden">
+    <!-- Top Bar -->
+    <header class="bg-gray-900 border-b border-gray-800 px-8 h-16 flex items-center justify-between shrink-0">
+      <h2 id="page-title" class="font-bold text-lg">Dashboard</h2>
+      <div class="flex items-center gap-4">
+        <input id="global-search" type="text" placeholder="Search books or orders..." class="bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-sm w-64 outline-none focus:border-green-500" />
+        <button onclick="location.reload()" class="p-2 hover:bg-gray-800 rounded-lg" title="Refresh">🔄</button>
+      </div>
+    </header>
+
+    <main class="flex-1 overflow-y-auto p-8">
+
+      <!-- ── DASHBOARD ────────────────────────────────────────────────── -->
+      <div id="section-dashboard" class="section active">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+          <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+            <p class="text-xs text-gray-500 uppercase tracking-widest mb-2">Total Orders</p>
+            <p id="stat-orders" class="text-3xl font-black">0</p>
+          </div>
+          <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+            <p class="text-xs text-gray-500 uppercase tracking-widest mb-2">Total Revenue</p>
+            <p id="stat-revenue" class="text-3xl font-black text-green-400">₹0</p>
+          </div>
+          <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+            <p class="text-xs text-gray-500 uppercase tracking-widest mb-2">Books in Catalog</p>
+            <p id="stat-books" class="text-3xl font-black text-blue-400">0</p>
+          </div>
+          <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+            <p class="text-xs text-gray-500 uppercase tracking-widest mb-2">Books Sold</p>
+            <p id="stat-sold" class="text-3xl font-black text-yellow-400">0</p>
+          </div>
+        </div>
+
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+          <h3 class="font-bold mb-6">Recent Orders</h3>
+          <div id="dash-recent-orders" class="space-y-3">
+            <p class="text-gray-500 text-sm">Loading...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── BOOKS ────────────────────────────────────────────────────── -->
+      <div id="section-books" class="section">
+        <div class="flex items-center justify-between mb-8">
+          <h2 class="text-xl font-bold">Manage Books</h2>
+          <button onclick="toggleAddForm()" class="bg-green-600 hover:bg-green-500 px-5 py-2 rounded-xl text-sm font-bold transition-all">+ Add Book</button>
+        </div>
+
+        <!-- Add / Edit Form -->
+        <div id="book-form-container" class="hidden bg-gray-900 border border-gray-800 rounded-2xl p-6 mb-8">
+          <h3 id="form-title" class="font-bold mb-6">Add New Book</h3>
+          <input type="hidden" id="edit-book-id" />
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="text-xs text-gray-400 uppercase tracking-widest block mb-1">Title *</label>
+              <input id="book-title" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-sm outline-none focus:border-green-500" placeholder="Book Title" />
+            </div>
+            <div>
+              <label class="text-xs text-gray-400 uppercase tracking-widest block mb-1">Author *</label>
+              <input id="book-author" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-sm outline-none focus:border-green-500" placeholder="Author Name" />
+            </div>
+            <div>
+              <label class="text-xs text-gray-400 uppercase tracking-widest block mb-1">Price (₹) *</label>
+              <input id="book-price" type="number" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-sm outline-none focus:border-green-500" placeholder="149" />
+            </div>
+            <div>
+              <label class="text-xs text-gray-400 uppercase tracking-widest block mb-1">Category *</label>
+              <select id="book-category" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-sm outline-none focus:border-green-500">
+                <option>Fiction</option><option>Classic</option><option>Non-Fiction</option>
+                <option>Self-Help</option><option>Fantasy</option><option>Sci-Fi</option>
+                <option>Academic</option><option>Biography</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-xs text-gray-400 uppercase tracking-widest block mb-1">Condition *</label>
+              <select id="book-condition" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-sm outline-none focus:border-green-500">
+                <option>Like New</option><option>Good</option><option>Acceptable</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-xs text-gray-400 uppercase tracking-widest block mb-1">Image URL</label>
+              <input id="book-image" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-sm outline-none focus:border-green-500" placeholder="https://..." />
+            </div>
+          </div>
+          <div class="flex gap-4 mt-6">
+            <button onclick="saveBook()" class="bg-green-600 hover:bg-green-500 px-8 py-2 rounded-xl text-sm font-bold transition-all">Save Book</button>
+            <button onclick="toggleAddForm()" class="text-gray-500 hover:text-white px-4 py-2 text-sm">Cancel</button>
+          </div>
+        </div>
+
+        <!-- Search -->
+        <input id="book-search" type="text" placeholder="Filter by title or author..." class="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 text-sm outline-none focus:border-green-500 mb-6" oninput="filterBooks()" />
+
+        <!-- Grid -->
+        <div id="books-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <p class="text-gray-500">Loading books...</p>
+        </div>
+      </div>
+
+      <!-- ── ORDERS ───────────────────────────────────────────────────── -->
+      <div id="section-orders" class="section">
+        <div class="flex items-center justify-between mb-8">
+          <h2 class="text-xl font-bold">Customer Orders</h2>
+          <select id="status-filter" onchange="filterOrders()" class="bg-gray-900 border border-gray-800 rounded-xl px-4 py-2 text-sm outline-none">
+            <option value="">All Statuses</option>
+            <option value="Pending">Pending</option>
+            <option value="Shipped">Shipped</option>
+            <option value="Delivered">Delivered</option>
+          </select>
+        </div>
+        <div id="orders-list" class="space-y-4">
+          <p class="text-gray-500">Loading orders...</p>
+        </div>
+      </div>
+
+      <!-- ── ANALYTICS ───────────────────────────────────────────────── -->
+      <div id="section-analytics" class="section">
+        <h2 class="text-xl font-bold mb-8">Sales Analytics</h2>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+            <h3 class="font-bold mb-6">Revenue by Category</h3>
+            <canvas id="chart-revenue" height="300"></canvas>
+          </div>
+          <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+            <h3 class="font-bold mb-6">Order Status Distribution</h3>
+            <canvas id="chart-status" height="300"></canvas>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ── Firebase & App Logic ─────────────────────────────────────────── -->
+<script type="module">
+  import { db } from "./js/firebase-config.js";
+  import {
+    collection, getDocs, addDoc, updateDoc, deleteDoc,
+    doc, query, orderBy, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+  // ── State ─────────────────────────────────────────────────────────────
+  let allBooks = [];
+  let allOrders = [];
+  let revenueChart = null;
+  let statusChart = null;
+
+  // ── Navigation ────────────────────────────────────────────────────────
+  window.showSection = (name) => {
+    document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+    document.querySelectorAll(".nav-item").forEach(b => b.classList.remove("active"));
+    document.getElementById("section-" + name).classList.add("active");
+    document.getElementById("nav-" + name).classList.add("active");
+    document.getElementById("page-title").textContent = {
+      dashboard: "Dashboard",
+      books: "Manage Books",
+      orders: "Orders",
+      analytics: "Sales Analytics"
+    }[name];
+    if(name === "analytics") buildCharts();
+  };
+
+  window.logout = () => {
+    localStorage.removeItem("loggedIn");
+    window.location.href = "login.html";
+  };
+
+  // ── Load Everything ────────────────────────────────────────────────────
+  async function init() {
+    await Promise.all([loadBooks(), loadOrders()]);
+    updateDashboard();
+  }
+
+  // ── BOOKS ─────────────────────────────────────────────────────────────
+  async function loadBooks() {
+    const snap = await getDocs(collection(db, "books"));
+    allBooks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderBooks(allBooks);
+    document.getElementById("stat-books").textContent = allBooks.length;
+  }
+
+  function renderBooks(books) {
+    const grid = document.getElementById("books-grid");
+    if(!books.length){
+      grid.innerHTML = `<div class="col-span-full py-16 text-center text-gray-500">No books in catalog. Add your first book!</div>`;
+      return;
+    }
+    grid.innerHTML = books.map(b => `
+      <div class="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden hover:border-green-500/30 transition-all">
+        <div class="h-40 bg-gray-800 overflow-hidden">
+          <img src="${b.image || 'https://via.placeholder.com/400x200/1f2937/4ade80?text=📚'}" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/400x200/1f2937/4ade80?text=📚'" />
+        </div>
+        <div class="p-4">
+          <h4 class="font-bold text-sm line-clamp-1">${b.title}</h4>
+          <p class="text-xs text-gray-400 italic mb-1">${b.author}</p>
+          <div class="flex justify-between items-center mt-2 mb-3">
+            <span class="text-green-400 font-bold">₹${b.price}</span>
+            <span class="text-[10px] bg-gray-800 px-2 py-0.5 rounded-full">${b.condition}</span>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="editBook('${b.id}')" class="flex-1 text-xs bg-blue-600/20 hover:bg-blue-600/40 text-blue-400 py-1.5 rounded-lg font-bold transition-all">Edit</button>
+            <button onclick="deleteBook('${b.id}')" class="flex-1 text-xs bg-red-600/20 hover:bg-red-600/40 text-red-400 py-1.5 rounded-lg font-bold transition-all">Delete</button>
+          </div>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  window.filterBooks = () => {
+    const q = document.getElementById("book-search").value.toLowerCase();
+    renderBooks(allBooks.filter(b => b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q)));
+  };
+
+  window.toggleAddForm = () => {
+    const c = document.getElementById("book-form-container");
+    c.classList.toggle("hidden");
+    clearBookForm();
+    document.getElementById("form-title").textContent = "Add New Book";
+  };
+
+  function clearBookForm() {
+    ["book-title","book-author","book-price","book-image","edit-book-id"].forEach(id => document.getElementById(id).value = "");
+  }
+
+  window.editBook = (id) => {
+    const b = allBooks.find(x => x.id === id);
+    if(!b) return;
+    document.getElementById("edit-book-id").value = id;
+    document.getElementById("book-title").value = b.title;
+    document.getElementById("book-author").value = b.author;
+    document.getElementById("book-price").value = b.price;
+    document.getElementById("book-category").value = b.category;
+    document.getElementById("book-condition").value = b.condition;
+    document.getElementById("book-image").value = b.image || "";
+    document.getElementById("book-form-container").classList.remove("hidden");
+    document.getElementById("form-title").textContent = "Edit Book";
+  };
+
+  window.saveBook = async () => {
+    const title = document.getElementById("book-title").value.trim();
+    const author = document.getElementById("book-author").value.trim();
+    const price = parseFloat(document.getElementById("book-price").value);
+    if(!title || !author || !price){ alert("Fill in all required fields."); return; }
+
+    const data = {
+      title, author, price,
+      category: document.getElementById("book-category").value,
+      condition: document.getElementById("book-condition").value,
+      image: document.getElementById("book-image").value.trim(),
+    };
+
+    const editId = document.getElementById("edit-book-id").value;
+    if(editId) {
+      await updateDoc(doc(db, "books", editId), data);
+      alert("Book updated!");
+    } else {
+      data.createdAt = serverTimestamp();
+      await addDoc(collection(db, "books"), data);
+      alert("Book added!");
+    }
+    toggleAddForm();
+    await loadBooks();
+  };
+
+  window.deleteBook = async (id) => {
+    if(!confirm("Delete this book permanently?")) return;
+    await deleteDoc(doc(db, "books", id));
+    await loadBooks();
+  };
+
+  // ── ORDERS ────────────────────────────────────────────────────────────
+  async function loadOrders() {
+    const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
+    const snap = await getDocs(q);
+    allOrders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderOrders(allOrders);
+  }
+
+  function statusColor(s) {
+    if(s === "Delivered") return "text-green-400 bg-green-500/10";
+    if(s === "Shipped") return "text-blue-400 bg-blue-500/10";
+    return "text-yellow-400 bg-yellow-500/10";
+  }
+
+  function renderOrders(orders) {
+    const el = document.getElementById("orders-list");
+    if(!orders.length){
+      el.innerHTML = `<div class="py-16 text-center text-gray-500">No orders found.</div>`;
+      return;
+    }
+    el.innerHTML = orders.map(o => {
+      const date = o.createdAt ? new Date(o.createdAt.seconds * 1000).toLocaleDateString() : "—";
+      const s = o.status || "Pending";
+      return `
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+          <div class="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-4">
+            <div>
+              <p class="text-xs text-gray-500 uppercase tracking-widest mb-1">Customer</p>
+              <p class="font-bold">${o.email}</p>
+              <p class="text-xs text-gray-500 mt-1">${date} · ${o.address || '—'}</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <select onchange="updateOrderStatus('${o.id}', this.value)" class="bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-xs outline-none">
+                <option ${s==='Pending'?'selected':''}>Pending</option>
+                <option ${s==='Shipped'?'selected':''}>Shipped</option>
+                <option ${s==='Delivered'?'selected':''}>Delivered</option>
+              </select>
+              <span class="text-xs px-3 py-1 rounded-full font-bold ${statusColor(s)}">${s}</span>
+              <button onclick="deleteOrder('${o.id}')" class="text-gray-600 hover:text-red-400 text-xs font-bold">✕</button>
+            </div>
+          </div>
+          <div class="border-t border-gray-800 pt-4 flex justify-between items-end">
+            <div class="text-xs text-gray-500 space-y-0.5">
+              ${(o.items||[]).map(i => `<p>${i.name} × ${i.qty}</p>`).join("")}
+            </div>
+            <p class="text-xl font-black text-green-400">₹${o.total}</p>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  window.filterOrders = () => {
+    const f = document.getElementById("status-filter").value;
+    renderOrders(f ? allOrders.filter(o => (o.status||"Pending") === f) : allOrders);
+  };
+
+  window.updateOrderStatus = async (id, status) => {
+    await updateDoc(doc(db, "orders", id), { status });
+    await loadOrders();
+  };
+
+  window.deleteOrder = async (id) => {
+    if(!confirm("Delete this order?")) return;
+    await deleteDoc(doc(db, "orders", id));
+    await loadOrders();
+  };
+
+  // ── DASHBOARD ─────────────────────────────────────────────────────────
+  function updateDashboard() {
+    const revenue = allOrders.reduce((s, o) => s + (o.total || 0), 0);
+    const sold = allOrders.reduce((s, o) => s + (o.items || []).reduce((a, i) => a + (i.qty || 1), 0), 0);
+    document.getElementById("stat-orders").textContent = allOrders.length;
+    document.getElementById("stat-revenue").textContent = `₹${revenue}`;
+    document.getElementById("stat-sold").textContent = sold;
+
+    const recent = allOrders.slice(0, 5);
+    const el = document.getElementById("dash-recent-orders");
+    if(!recent.length){ el.innerHTML = `<p class="text-gray-500 text-sm">No orders yet.</p>`; return; }
+    el.innerHTML = recent.map(o => {
+      const s = o.status || "Pending";
+      return `
+        <div class="flex items-center justify-between py-3 border-b border-gray-800 last:border-0">
+          <div>
+            <p class="text-sm font-semibold">${o.email}</p>
+            <p class="text-xs text-gray-500">${(o.items||[]).length} item(s)</p>
+          </div>
+          <div class="flex items-center gap-4">
+            <span class="text-xs font-bold ${statusColor(s)} px-2 py-0.5 rounded-full">${s}</span>
+            <span class="font-bold text-green-400">₹${o.total}</span>
+          </div>
+        </div>
+      `;
+    }).join("");
+  }
+
+  // ── CHARTS ────────────────────────────────────────────────────────────
+  function buildCharts() {
+    const categories = {};
+    allOrders.forEach(o => {
+      (o.items || []).forEach(i => {
+        const cat = i.category || "Other";
+        categories[cat] = (categories[cat] || 0) + (i.price * (i.qty || 1));
+      });
+    });
+
+    const statuses = { Pending: 0, Shipped: 0, Delivered: 0 };
+    allOrders.forEach(o => { statuses[o.status || "Pending"]++; });
+
+    if(revenueChart) revenueChart.destroy();
+    if(statusChart) statusChart.destroy();
+
+    revenueChart = new Chart(document.getElementById("chart-revenue"), {
+      type: "bar",
+      data: {
+        labels: Object.keys(categories).length ? Object.keys(categories) : ["No Data"],
+        datasets: [{ label: "Revenue (₹)", data: Object.values(categories).length ? Object.values(categories) : [0], backgroundColor: "#22c55e" }]
+      },
+      options: { plugins: { legend: { labels: { color: "#9ca3af" } } }, scales: { x: { ticks: { color: "#9ca3af" } }, y: { ticks: { color: "#9ca3af" } } } }
+    });
+
+    statusChart = new Chart(document.getElementById("chart-status"), {
+      type: "doughnut",
+      data: {
+        labels: ["Pending", "Shipped", "Delivered"],
+        datasets: [{ data: Object.values(statuses), backgroundColor: ["#eab308", "#3b82f6", "#22c55e"] }]
+      },
+      options: { plugins: { legend: { labels: { color: "#9ca3af" } } } }
+    });
+  }
+
+  // ── Global Search ──────────────────────────────────────────────────────
+  document.getElementById("global-search").addEventListener("input", (e) => {
+    const q = e.target.value.toLowerCase();
+    if(!q) return;
+    document.getElementById("book-search").value = q;
+    showSection("books");
+    window.filterBooks();
+  });
+
+  // ── Init ──────────────────────────────────────────────────────────────
+  init();
+</script>
+</body>
+</html>

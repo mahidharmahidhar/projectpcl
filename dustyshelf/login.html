@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login — DustyShelf</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { parchment: '#FDFCF8', ink: '#1A1A1A', forest: '#1A3C34', gold: '#B8860B', clay: '#7D6B5D' },
+          fontFamily: { serif: ['"Playfair Display"', 'serif'], sans: ['Inter', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-parchment text-ink min-h-screen flex flex-col md:flex-row">
+
+  <!-- Left: Aesthetics -->
+  <div class="hidden md:flex md:w-1/2 bg-forest relative overflow-hidden items-center justify-center p-12">
+    <div class="relative z-10 text-center">
+      <h2 class="serif text-parchment text-6xl font-bold leading-tight mb-6">Welcome back to <br/><span class="italic font-normal">the library.</span></h2>
+      <p class="text-parchment/60 font-sans tracking-widest uppercase text-xs font-bold">Curated Classics Since 2024</p>
+    </div>
+    <!-- Decorative texture -->
+    <div class="absolute inset-0 opacity-10" style="background-image: url('https://www.transparenttextures.com/patterns/paper.png');"></div>
+    <div class="absolute -bottom-20 -left-20 w-80 h-80 bg-gold/20 rounded-full blur-3xl"></div>
+  </div>
+
+  <!-- Right: Form -->
+  <div class="flex-1 flex items-center justify-center p-8 bg-parchment">
+    <div class="max-w-sm w-full">
+      <div class="text-center md:text-left mb-12">
+        <a href="index.html" class="serif text-3xl font-black tracking-tighter mb-8 inline-block">Dusty<span class="italic font-normal">Shelf</span></a>
+        <h3 class="serif text-4xl font-bold text-forest mb-2">Member Login</h3>
+        <p class="text-clay text-sm">Access your curated collection and history.</p>
+      </div>
+
+      <div class="space-y-6">
+        <div>
+          <label class="block text-[10px] font-black uppercase tracking-widest text-clay mb-2">Email Address</label>
+          <input id="email" type="email" placeholder="email@example.com" class="w-full bg-transparent border-b border-gray-200 py-3 text-sm outline-none focus:border-gold transition-all" />
+        </div>
+        <div>
+          <label class="block text-[10px] font-black uppercase tracking-widest text-clay mb-2">Password</label>
+          <input id="password" type="password" placeholder="••••••••" class="w-full bg-transparent border-b border-gray-200 py-3 text-sm outline-none focus:border-gold transition-all" />
+        </div>
+
+        <button onclick="login()" class="w-full bg-forest text-parchment py-4 rounded-full font-bold text-xs uppercase tracking-widest hover:bg-ink transition-all shadow-xl shadow-forest/10 mt-4">
+          Sign In
+        </button>
+
+        <p class="text-center text-xs text-clay font-medium pt-4">
+          Not a member yet? <a href="signup.html" class="text-gold font-bold hover:underline">Create an account</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+<script>
+function login(){
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+
+  if(!storedUser){
+    alert("No account found! Please signup first.");
+    return;
+  }
+
+  if(email === storedUser.email && password === storedUser.password){
+    localStorage.setItem("loggedIn", "true");
+    window.location.href = "index.html";
+  } 
+  else {
+    alert("Invalid Email or Password");
+  }
+}
+</script>
+
+</body>
+</html>

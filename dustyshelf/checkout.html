@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Checkout — DustyShelf</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { parchment: '#FDFCF8', ink: '#1A1A1A', forest: '#1A3C34', gold: '#B8860B', clay: '#7D6B5D' },
+          fontFamily: { serif: ['"Playfair Display"', 'serif'], sans: ['Inter', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+</head>
+
+<body class="bg-parchment text-ink min-h-screen">
+  <!-- Page protection -->
+  <script>
+    if(localStorage.getItem("loggedIn") !== "true"){
+      window.location.href = "login.html";
+    }
+  </script>
+
+  <nav class="bg-parchment border-b border-gray-100">
+    <div class="max-w-5xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href="index.html" class="serif text-xl font-black tracking-tighter">Dusty<span class="italic font-normal">Shelf</span></a>
+      <div class="hidden md:flex gap-4 text-[10px] font-bold uppercase tracking-[0.2em] text-clay">
+        <span>Cart</span>
+        <span class="text-gold">→</span>
+        <span class="text-ink">Delivery</span>
+        <span class="text-gray-200">→</span>
+        <span class="text-gray-200">Finish</span>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-5xl mx-auto px-6 py-16">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-20">
+      
+      <!-- Form -->
+      <div>
+        <h1 class="serif text-4xl font-bold text-forest mb-12">Shipping Details</h1>
+        
+        <div class="space-y-10">
+          <div class="grid grid-cols-2 gap-8">
+            <div class="col-span-2 sm:col-span-1">
+              <label class="block text-[10px] font-black uppercase tracking-widest text-clay mb-3">Full Name</label>
+              <input id="full-name" type="text" class="w-full bg-transparent border-b border-gray-200 py-3 text-sm outline-none focus:border-gold" placeholder="Julian Barnes" />
+            </div>
+            <div class="col-span-2 sm:col-span-1">
+              <label class="block text-[10px] font-black uppercase tracking-widest text-clay mb-3">Phone</label>
+              <input id="phone" type="tel" class="w-full bg-transparent border-b border-gray-200 py-3 text-sm outline-none focus:border-gold" placeholder="9876543210" />
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-8">
+            <div>
+              <label class="block text-[10px] font-black uppercase tracking-widest text-clay mb-3">City</label>
+              <input id="city" type="text" class="w-full bg-transparent border-b border-gray-200 py-3 text-sm outline-none focus:border-gold" placeholder="London" />
+            </div>
+            <div>
+              <label class="block text-[10px] font-black uppercase tracking-widest text-clay mb-3">Pincode</label>
+              <input id="pincode" type="text" class="w-full bg-transparent border-b border-gray-200 py-3 text-sm outline-none focus:border-gold" placeholder="NW1 6XE" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-[10px] font-black uppercase tracking-widest text-clay mb-3">Full Address</label>
+            <textarea id="address" rows="3" class="w-full bg-transparent border-b border-gray-200 py-3 text-sm outline-none focus:border-gold resize-none" placeholder="221B Baker Street..."></textarea>
+          </div>
+
+          <div>
+            <label class="block text-[10px] font-black uppercase tracking-widest text-clay mb-6">Payment Method</label>
+            <div class="grid grid-cols-2 gap-4">
+              <button class="pay-btn border border-gray-100 p-6 rounded-2xl text-left hover:border-gold transition-all bg-white" data-method="UPI">
+                <span class="text-xl block mb-2">📱</span>
+                <span class="text-xs font-bold uppercase tracking-widest">Digital UPI</span>
+              </button>
+              <button class="pay-btn border border-gray-100 p-6 rounded-2xl text-left hover:border-gold transition-all bg-white" data-method="Card">
+                <span class="text-xl block mb-2">💳</span>
+                <span class="text-xs font-bold uppercase tracking-widest">Credit Card</span>
+              </button>
+              <button class="pay-btn border border-gray-100 p-6 rounded-2xl text-left hover:border-gold transition-all bg-white" data-method="COD">
+                <span class="text-xl block mb-2">🏠</span>
+                <span class="text-xs font-bold uppercase tracking-widest">Hand Delivery</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Summary Sticky -->
+      <div>
+        <div class="bg-forest p-10 rounded-[3rem] text-parchment sticky top-8 shadow-2xl shadow-forest/20">
+          <h2 class="serif text-3xl font-bold mb-8">Review Order</h2>
+          <div id="order-items" class="space-y-4 mb-8 max-h-64 overflow-y-auto no-scrollbar"></div>
+          
+          <div class="border-t border-white/10 pt-6 space-y-3 text-sm mb-10">
+            <div class="flex justify-between text-parchment/60">
+              <span>Subtotal</span>
+              <span>₹<span id="order-total">0</span></span>
+            </div>
+            <div class="flex justify-between text-parchment/60">
+              <span>Shipping</span>
+              <span class="italic">Included</span>
+            </div>
+            <div class="flex justify-between text-2xl font-bold pt-4 serif">
+              <span>Total</span>
+              <span>₹<span id="order-grand-total">0</span></span>
+            </div>
+          </div>
+
+          <button id="place-order-btn" class="w-full bg-gold text-parchment py-5 rounded-full font-bold text-xs uppercase tracking-[0.2em] hover:scale-[1.03] active:scale-95 transition-all shadow-xl shadow-black/10">
+            Finalize Order
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script type="module">
+    import { db } from "./js/firebase-config.js";
+    import { collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    const cart = JSON.parse(localStorage.getItem("dustyshelf_cart") || "[]");
+    const total = cart.reduce((s,i) => s + i.price * i.qty, 0);
+
+    document.getElementById("order-total").textContent = total;
+    document.getElementById("order-grand-total").textContent = total;
+
+    const itemsEl = document.getElementById("order-items");
+    itemsEl.innerHTML = cart.map(i => `
+      <div class="flex justify-between items-center text-sm">
+        <div class="min-w-0 pr-4">
+          <p class="font-bold truncate">${i.title}</p>
+          <p class="text-[10px] text-parchment/50 uppercase tracking-widest">${i.qty} Unit(s)</p>
+        </div>
+        <p class="serif font-bold">₹${i.price * i.qty}</p>
+      </div>
+    `).join("");
+
+    let selectedPayment = null;
+    document.querySelectorAll(".pay-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".pay-btn").forEach(b => b.classList.replace("border-gold", "border-gray-100"));
+        btn.classList.replace("border-gray-100", "border-gold");
+        selectedPayment = btn.dataset.method;
+      });
+    });
+
+    document.getElementById("place-order-btn").addEventListener("click", async () => {
+      const name = document.getElementById("full-name").value.trim();
+      const phone = document.getElementById("phone").value.trim();
+      const city = document.getElementById("city").value.trim();
+      const pin = document.getElementById("pincode").value.trim();
+      const addr = document.getElementById("address").value.trim();
+
+      if(!name || !phone || !city || !pin || !addr || !selectedPayment) {
+        alert("Please complete all fields and select a payment method.");
+        return;
+      }
+
+      const btn = document.getElementById("place-order-btn");
+      btn.textContent = "Processing...";
+      btn.disabled = true;
+
+      try {
+        const userEmail = JSON.parse(localStorage.getItem("user")).email;
+        
+        await addDoc(collection(db, "orders"), {
+          email: userEmail,
+          items: cart.map(i => ({ name: i.title, price: i.price, qty: i.qty })),
+          total: total,
+          address: `${name}, ${addr}, ${city} - ${pin}`,
+          phone: phone,
+          paymentMethod: selectedPayment,
+          status: "Pending",
+          createdAt: serverTimestamp()
+        });
+
+        localStorage.setItem("last_order", JSON.stringify({ items: cart, total: total }));
+        localStorage.removeItem("dustyshelf_cart");
+        window.location.href = "success.html";
+
+      } catch(err) {
+        alert("Order failed. Please check your configuration.");
+        btn.textContent = "Finalize Order";
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

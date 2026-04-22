@@ -1,0 +1,65 @@
+query ListAllListings @auth(level: PUBLIC, insecureReason: "This operation is safe to expose to the public as it lists public information.") {
+  listings {
+    id
+    title: book {
+      title
+    }
+    author: book {
+      author
+    }
+    price
+    condition
+    status
+    seller {
+      username
+    }
+  }
+}
+
+mutation CreateNewListing($bookId: UUID!, $condition: String!, $price: Float!, $status: String!, $description: String, $photos: [String!]) @auth(level: USER, insecureReason: "This operation is safe to expose to all logged in users as it allows them to create their own listings.") {
+  listing_insert(
+    data: {
+      sellerId_expr: "auth.uid",
+      bookId: $bookId,
+      condition: $condition,
+      price: $price,
+      status: $status,
+      description: $description,
+      photos: $photos,
+      createdAt_expr: "request.time"
+    }
+  ) {
+    id
+  }
+}
+
+query GetMyMessages @auth(level: USER, insecureReason: "This operation is safe to expose to all logged in users as it retrieves their personal messages.") {
+  messages_on_receiver(where: {receiverId: {eq_expr: "auth.uid"}}) {
+    id
+    content
+    sentAt
+    sender {
+      username
+    }
+    listing {
+      id
+      title: book {
+        title
+      }
+    }
+  }
+}
+
+mutation MakeOffer($listingId: UUID!, $offeredPrice: Float!) @auth(level: USER, insecureReason: "This operation is safe to expose to all logged in users as it allows them to make offers on listings.") {
+  offer_insert(
+    data: {
+      buyerId_expr: "auth.uid",
+      listingId: $listingId,
+      offeredPrice: $offeredPrice,
+      createdAt_expr: "request.time",
+      status: "PENDING"
+    }
+  ) {
+    id
+  }
+}
