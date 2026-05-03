@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Account — DustyShelf</title>
+  <meta name="description" content="Manage your DustyShelf profile, orders, addresses, and account settings." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;600&display=swap"
+    rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: { parchment: '#FDFCF8', ink: '#1A1A1A', forest: '#1A3C34', gold: '#B8860B', clay: '#7D6B5D' },
+          fontFamily: { serif: ['"Playfair Display"', 'serif'], sans: ['Inter', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #FDFCF8;
+      margin: 0;
+      padding: 0;
+    }
+
+    .serif {
+      font-family: 'Playfair Display', serif;
+    }
+
+    /* Main Content */
+    main {
+      opacity: 1 !important;
+      pointer-events: auto !important;
+      transition: opacity 0.3s ease;
+    }
+
+    /* Tab Navigation */
+    .tab-btn {
+      transition: all 0.25s ease;
+      cursor: pointer;
+      background: transparent;
+      border: 1px solid #E5E7EB;
+      color: #7D6B5D;
+    }
+
+    .tab-btn:hover {
+      background: #F3F4F6;
+    }
+
+    .tab-btn.active {
+      background: #1A3C34 !important;
+      color: #FDFCF8 !important;
+      border-color: #1A3C34;
+    }
+
+    .tab-panel {
+      display: none;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .tab-panel.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Form Fields */
+    .field-focus {
+      transition: all 0.3s ease;
+      border: 1px solid #E5E7EB;
+      background: #FDFCF8;
+      outline: none;
+    }
+
+    .field-focus:focus {
+      border-color: #B8860B;
+      box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.1);
+    }
+
+    .field-focus:disabled {
+      background: #F3F4F6;
+      color: #9CA3AF;
+      cursor: not-allowed;
+    }
+
+    /* Buttons */
+    button {
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    /* Order Cards */
+    .order-card {
+      transition: all 0.2s ease;
+      background: #FFFFFF;
+      border: 1px solid #E5E7EB;
+      border-radius: 1.5rem;
+      padding: 1.5rem;
+    }
+
+    .order-card:hover {
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+      border-color: #B8860B;
+    }
+
+    /* Status Badges */
+    .status-placed {
+      background: #fef3c7;
+      color: #92400e;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .status-shipped {
+      background: #dbeafe;
+      color: #1e40af;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .status-delivered {
+      background: #d1fae5;
+      color: #065f46;
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #D1D1D1;
+      border-radius: 10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #999999;
+    }
+
+    /* Layout Fixes */
+    .max-w-6xl {
+      max-width: 64rem;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      main {
+        padding-left: 1rem;
+        padding-right: 1rem;
+      }
+
+      .max-w-6xl {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+      }
+    }
+
+    /* Ensure no blocking overlays */
+    * {
+      -webkit-user-select: auto;
+      user-select: auto;
+    }
+  </style>
+</head>
+
+<body class="bg-parchment text-ink min-h-screen">
+
+  <!-- Navigation -->
+  <nav class="sticky top-0 z-40 bg-parchment/95 backdrop-blur-md border-b border-gray-100 shadow-sm">
+    <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
+      <a href="index.html"
+        class="serif text-2xl font-black tracking-tighter flex items-center gap-2 hover:text-forest transition-colors">
+        <span class="text-gold text-2xl">📖</span>
+        <span>Dusty<span class="italic font-normal">Shelf</span></span>
+      </a>
+      <div class="flex items-center gap-6">
+        <a href="index.html"
+          class="text-[10px] font-black uppercase tracking-widest text-clay hover:text-ink transition-colors hidden sm:block">←
+          Collection</a>
+        <a href="cart.html"
+          class="text-[10px] font-black uppercase tracking-widest text-clay hover:text-ink transition-colors hidden sm:block">🛒
+          Cart</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12 min-h-screen">
+    <!-- Profile Header -->
+    <div
+      class="flex flex-col sm:flex-row items-start sm:items-center gap-6 mb-12 bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-md">
+      <div
+        class="w-24 h-24 rounded-full bg-gradient-to-br from-forest to-ink flex items-center justify-center text-parchment text-3xl font-bold shadow-lg overflow-hidden shrink-0">
+        <img id="profile-avatar" src="" alt="Avatar" class="w-full h-full object-cover"
+          onerror="this.style.display='none'" />
+      </div>
+      <div class="flex-1 min-w-0">
+        <h1 id="profile-greeting" class="serif text-2xl sm:text-3xl font-bold text-forest mb-1 break-words">Hello, User
+        </h1>
+        <p id="profile-email" class="text-clay text-sm mb-1 break-all">email@example.com</p>
+        <p id="profile-since" class="text-clay/50 text-xs">Member since ...</p>
+      </div>
+      <button id="logoutBtn"
+        class="bg-red-50 text-red-600 border border-red-200 px-6 py-3 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-red-100 transition-all w-full sm:w-auto">
+        🚪 Logout
+      </button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex flex-wrap gap-3 mb-8 border-b border-gray-100 pb-4 overflow-x-auto">
+      <button
+        class="tab-btn active px-6 py-3 rounded-full text-xs font-bold uppercase tracking-widest border border-gray-200 whitespace-nowrap transition-all hover:bg-gray-50"
+        data-tab="profile">
+        👤 Profile
+      </button>
+      <button
+        class="tab-btn px-6 py-3 rounded-full text-xs font-bold uppercase tracking-widest text-clay border border-gray-200 whitespace-nowrap hover:bg-gray-50 transition-all"
+        data-tab="orders">
+        📦 My Orders
+      </button>
+      <button
+        class="tab-btn px-6 py-3 rounded-full text-xs font-bold uppercase tracking-widest text-clay border border-gray-200 whitespace-nowrap hover:bg-gray-50 transition-all"
+        data-tab="addresses">
+        📍 Addresses
+      </button>
+      <button
+        class="tab-btn px-6 py-3 rounded-full text-xs font-bold uppercase tracking-widest text-clay border border-gray-200 whitespace-nowrap hover:bg-gray-50 transition-all"
+        data-tab="notifications">
+        🔔 Notifications
+      </button>
+    </div>
+
+    <!-- ── PROFILE TAB ──────────────────────────────────────────────────── -->
+    <div id="tab-profile" class="tab-panel active">
+      <div class="bg-white rounded-3xl border border-gray-100 p-8 max-w-2xl shadow-md">
+        <h2 class="serif text-2xl font-bold text-forest mb-8">Personal Details</h2>
+        <div class="space-y-6">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-[10px] font-black uppercase tracking-widest text-clay mb-2">Full Name</label>
+              <input id="edit-name" type="text" placeholder="Enter your full name"
+                class="field-focus w-full bg-white border border-gray-200 rounded-2xl px-4 py-3 text-sm outline-none" />
+            </div>
+            <div>
+              <label class="block text-[10px] font-black uppercase tracking-widest text-clay mb-2">Phone Number</label>
+              <input id="edit-phone" type="tel" placeholder="Enter your phone number"
+                class="field-focus w-full bg-white border border-gray-200 rounded-2xl px-4 py-3 text-sm outline-none" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-[10px] font-black uppercase tracking-widest text-clay mb-2">Email Address</label>
+            <input id="edit-email" type="email" disabled placeholder="Your email"
+              class="w-full bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-sm outline-none text-clay cursor-not-allowed" />
+          </div>
+          <div>
+            <label class="block text-[10px] font-black uppercase tracking-widest text-clay mb-2">Account Role</label>
+            <input id="edit-role" type="text" disabled placeholder="Your role"
+              class="w-full bg-gray-50 border border-gray-200 rounded-2xl px-4 py-3 text-sm outline-none text-clay cursor-not-allowed capitalize" />
+          </div>
+          <div class="pt-4 flex gap-4">
+            <button id="saveProfileBtn"
+              class="bg-forest text-parchment px-10 py-3 rounded-full font-bold text-xs uppercase tracking-widest hover:bg-ink transition-all shadow-xl shadow-forest/10 w-full sm:w-auto">
+              ✓ Save Changes
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ORDERS TAB ──────────────────────────────────────────────────── -->
+    <div id="tab-orders" class="tab-panel">
+      <div class="mb-6">
+        <h2 class="serif text-2xl font-bold text-forest mb-2">My Orders</h2>
+        <p class="text-clay text-sm">Track your curated collection purchases.</p>
+      </div>
+      <div id="orders-loading" class="text-center py-16 text-clay">
+        <div class="inline-block w-8 h-8 border-3 border-forest/20 border-t-forest rounded-full animate-spin mb-4">
+        </div>
+        <p class="font-medium">Loading your orders...</p>
+      </div>
+      <div id="orders-list" class="space-y-4"></div>
+      <div id="orders-empty" class="hidden text-center py-16 bg-white rounded-3xl border border-gray-100 shadow-md">
+        <p class="serif italic text-2xl text-clay mb-4">📚 No orders yet.</p>
+        <a href="index.html"
+          class="inline-block bg-forest text-parchment px-10 py-3 rounded-full font-bold text-xs uppercase tracking-widest shadow-xl shadow-forest/10">Browse
+          Collection</a>
+      </div>
+    </div>
+
+    <!-- ── ADDRESSES TAB ──────────────────────────────────────────────── -->
+    <div id="tab-addresses" class="tab-panel">
+      <div class="bg-white rounded-3xl border border-gray-100 p-6 sm:p-8 shadow-md mb-6">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+          <div>
+            <h2 class="serif text-2xl font-bold text-forest mb-2">Saved Addresses</h2>
+            <p class="text-clay text-sm">Manage your shipping locations.</p>
+          </div>
+          <button id="addAddressBtn"
+            class="bg-forest text-parchment px-6 py-3 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-ink transition-all shadow-lg w-full sm:w-auto">
+            + Add Address
+          </button>
+        </div>
+
+        <!-- Add Address Form (hidden by default) -->
+        <div id="address-form" class="hidden bg-parchment rounded-2xl border border-gray-200 p-6 mb-6">
+          <h3 class="serif text-xl font-bold text-forest mb-6">New Address</h3>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <input id="addr-label" placeholder="Label (Home, Office...)"
+              class="field-focus bg-white border border-gray-200 rounded-2xl px-4 py-3 text-sm outline-none" />
+            <input id="addr-phone" placeholder="Phone Number"
+              class="field-focus bg-white border border-gray-200 rounded-2xl px-4 py-3 text-sm outline-none" />
+          </div>
+          <textarea id="addr-full" rows="2" placeholder="Full Address"
+            class="field-focus w-full bg-white border border-gray-200 rounded-2xl px-4 py-3 text-sm outline-none resize-none mb-4"></textarea>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+            <input id="addr-city" placeholder="City"
+              class="field-focus bg-white border border-gray-200 rounded-2xl px-4 py-3 text-sm outline-none" />
+            <input id="addr-pincode" placeholder="Pincode"
+              class="field-focus bg-white border border-gray-200 rounded-2xl px-4 py-3 text-sm outline-none" />
+          </div>
+          <div class="flex gap-3">
+            <button id="saveAddrBtn"
+              class="bg-forest text-parchment px-8 py-3 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-ink transition-all">Save</button>
+            <button id="cancelAddrBtn"
+              class="text-clay text-xs font-bold uppercase tracking-widest hover:text-ink transition-colors px-4 py-3 border border-gray-200 rounded-full">Cancel</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="addresses-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+      <div id="addresses-empty" class="hidden text-center py-16 bg-white rounded-3xl border border-gray-100">
+        <p class="serif italic text-xl text-clay mb-2">No saved addresses.</p>
+        <p class="text-clay/60 text-xs">Add an address for faster checkout.</p>
+      </div>
+    </div>
+
+    <!-- ── NOTIFICATIONS TAB ──────────────────────────────────────────── -->
+    <div id="tab-notifications" class="tab-panel">
+      <div class="mb-6">
+        <h2 class="serif text-2xl font-bold text-forest mb-2">Notifications</h2>
+        <p class="text-clay text-sm">Stay updated on your orders and account activity.</p>
+      </div>
+      <div id="notifications-list" class="space-y-3"></div>
+      <div id="notifications-empty" class="hidden text-center py-16 bg-white rounded-3xl border border-gray-100">
+        <p class="serif italic text-xl text-clay mb-2">All caught up!</p>
+        <p class="text-clay/60 text-xs">You have no new notifications.</p>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-100 mt-12 py-8 bg-white">
+    <p class="text-center text-[10px] text-clay/60 font-bold uppercase tracking-[0.3em] px-4">DustyShelf Collective
+      &#183; Est. 2024</p>
+  </footer>
+  <!-- Review Modal -->
+  <div id="review-modal"
+    class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-parchment rounded-3xl max-w-md w-full p-8 shadow-2xl">
+      <h3 class="serif text-2xl font-bold text-forest mb-2">Write a Review</h3>
+      <p id="review-book-title" class="text-clay text-sm mb-6"></p>
+      <input type="hidden" id="review-order-id" />
+      <div class="mb-6">
+        <label class="block text-[10px] font-black uppercase tracking-widest text-clay mb-3">Rating</label>
+        <div id="star-rating" class="flex gap-2 text-3xl cursor-pointer">
+          <span data-star="1" class="text-gray-300 hover:text-gold transition-colors">&#9733;</span>
+          <span data-star="2" class="text-gray-300 hover:text-gold transition-colors">&#9733;</span>
+          <span data-star="3" class="text-gray-300 hover:text-gold transition-colors">&#9733;</span>
+          <span data-star="4" class="text-gray-300 hover:text-gold transition-colors">&#9733;</span>
+          <span data-star="5" class="text-gray-300 hover:text-gold transition-colors">&#9733;</span>
+        </div>
+      </div>
+      <div class="mb-6">
+        <label class="block text-[10px] font-black uppercase tracking-widest text-clay mb-3">Your Review</label>
+        <textarea id="review-comment" rows="4" placeholder="Share your experience with these books..."
+          class="w-full bg-white border border-gray-200 rounded-2xl px-4 py-3 text-sm outline-none focus:border-gold resize-none"></textarea>
+      </div>
+      <button id="submit-review-btn"
+        class="w-full bg-forest text-parchment py-4 rounded-full font-bold text-xs uppercase tracking-widest hover:bg-ink transition-all">
+        Submit Review
+      </button>
+      <button onclick="document.getElementById('review-modal').classList.add('hidden')"
+        class="w-full mt-3 text-clay text-xs font-bold uppercase tracking-widest hover:text-ink transition-colors py-2">
+        Cancel
+      </button>
+    </div>
+  </div>
+
+  <script type="module" src="./js/dashboard.js"></script>
+</body>
+
+</html>

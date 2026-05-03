@@ -18,14 +18,7 @@
 </head>
 <body class="bg-gray-950 text-white">
 
-<!-- Access Control -->
-<script>
-  const _u = JSON.parse(localStorage.getItem("user"));
-  const ADMIN = "admin@dustyshelf.com";
-  if(!localStorage.getItem("loggedIn") || !_u || _u.email !== ADMIN){
-    alert("Admins only!"); window.location.href = "login.html";
-  }
-</script>
+<!-- Access Control handled in module -->
 
 <div class="flex h-screen overflow-hidden">
   <!-- ── Sidebar ─────────────────────────────────────────────────────── -->
@@ -44,6 +37,12 @@
       </button>
       <button onclick="showSection('orders')" class="nav-item w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-3" id="nav-orders">
         <span>📦</span> Orders
+      </button>
+      <button onclick="showSection('users')" class="nav-item w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-3" id="nav-users">
+        <span>👥</span> Users
+      </button>
+      <button onclick="showSection('reviews')" class="nav-item w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-3" id="nav-reviews">
+        <span>⭐</span> Reviews
       </button>
       <button onclick="showSection('analytics')" class="nav-item w-full text-left px-4 py-3 rounded-xl text-sm font-semibold flex items-center gap-3" id="nav-analytics">
         <span>📈</span> Analytics
@@ -148,6 +147,10 @@
               <label class="text-xs text-gray-400 uppercase tracking-widest block mb-1">Image URL</label>
               <input id="book-image" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-sm outline-none focus:border-green-500" placeholder="https://..." />
             </div>
+            <div>
+              <label class="text-xs text-gray-400 uppercase tracking-widest block mb-1">Seller UPI ID</label>
+              <input id="book-upi" class="w-full bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-sm outline-none focus:border-green-500" placeholder="e.g. yourname@upi" />
+            </div>
           </div>
           <div class="flex gap-4 mt-6">
             <button onclick="saveBook()" class="bg-green-600 hover:bg-green-500 px-8 py-2 rounded-xl text-sm font-bold transition-all">Save Book</button>
@@ -170,13 +173,31 @@
           <h2 class="text-xl font-bold">Customer Orders</h2>
           <select id="status-filter" onchange="filterOrders()" class="bg-gray-900 border border-gray-800 rounded-xl px-4 py-2 text-sm outline-none">
             <option value="">All Statuses</option>
-            <option value="Pending">Pending</option>
-            <option value="Shipped">Shipped</option>
-            <option value="Delivered">Delivered</option>
+            <option value="Pending Verification">⏳ Pending Verification</option>
+            <option value="placed">📦 Placed</option>
+            <option value="Shipped">🚚 Shipped</option>
+            <option value="Delivered">✅ Delivered</option>
+            <option value="Rejected">❌ Rejected</option>
           </select>
         </div>
         <div id="orders-list" class="space-y-4">
           <p class="text-gray-500">Loading orders...</p>
+        </div>
+      </div>
+
+      <!-- ── USERS ──────────────────────────────────────────────────── -->
+      <div id="section-users" class="section">
+        <h2 class="text-xl font-bold mb-8">Registered Users</h2>
+        <div id="users-list" class="space-y-3">
+          <p class="text-gray-500">Loading users...</p>
+        </div>
+      </div>
+
+      <!-- ── REVIEWS ─────────────────────────────────────────────────── -->
+      <div id="section-reviews" class="section">
+        <h2 class="text-xl font-bold mb-8">Customer Reviews</h2>
+        <div id="reviews-list" class="space-y-4">
+          <p class="text-gray-500">Loading reviews...</p>
         </div>
       </div>
 
@@ -205,7 +226,15 @@
   import {
     collection, getDocs, addDoc, updateDoc, deleteDoc,
     doc, query, orderBy, serverTimestamp
-  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+  import { getCurrentUser, logOut, initAuthState } from "./js/auth.js";
+
+  // Check admin access — use getCurrentUser first, then verify via initAuthState
+  let currentUser = getCurrentUser();
+  if (!currentUser || (currentUser.role !== "admin" && currentUser.email !== "admin@dustyshelf.com")) {
+    // Also try from Firestore in case localStorage is stale
+    alert("Admins only!"); window.location.href = "login.html";
+  }
 
   // ── State ─────────────────────────────────────────────────────────────
   let allBooks = [];
@@ -223,20 +252,28 @@
       dashboard: "Dashboard",
       books: "Manage Books",
       orders: "Orders",
+      users: "Registered Users",
+      reviews: "Customer Reviews",
       analytics: "Sales Analytics"
     }[name];
     if(name === "analytics") buildCharts();
+    if(name === "users") loadUsers();
+    if(name === "reviews") loadReviews();
   };
 
-  window.logout = () => {
-    localStorage.removeItem("loggedIn");
+  window.logout = async () => {
+    await logOut();
     window.location.href = "login.html";
   };
 
   // ── Load Everything ────────────────────────────────────────────────────
   async function init() {
-    await Promise.all([loadBooks(), loadOrders()]);
-    updateDashboard();
+    try {
+      await Promise.all([loadBooks(), loadOrders()]);
+      updateDashboard();
+    } catch(e) {
+      console.error("Admin init error:", e);
+    }
   }
 
   // ── BOOKS ─────────────────────────────────────────────────────────────
@@ -287,7 +324,7 @@
   };
 
   function clearBookForm() {
-    ["book-title","book-author","book-price","book-image","edit-book-id"].forEach(id => document.getElementById(id).value = "");
+    ["book-title","book-author","book-price","book-image","book-upi","edit-book-id"].forEach(id => document.getElementById(id).value = "");
   }
 
   window.editBook = (id) => {
@@ -300,6 +337,7 @@
     document.getElementById("book-category").value = b.category;
     document.getElementById("book-condition").value = b.condition;
     document.getElementById("book-image").value = b.image || "";
+    document.getElementById("book-upi").value = b.upiId || "";
     document.getElementById("book-form-container").classList.remove("hidden");
     document.getElementById("form-title").textContent = "Edit Book";
   };
@@ -308,10 +346,11 @@
     const title = document.getElementById("book-title").value.trim();
     const author = document.getElementById("book-author").value.trim();
     const price = parseFloat(document.getElementById("book-price").value);
+    const upiId = document.getElementById("book-upi").value.trim() || "admin@upi"; // fallback
     if(!title || !author || !price){ alert("Fill in all required fields."); return; }
 
     const data = {
-      title, author, price,
+      title, author, price, upiId,
       category: document.getElementById("book-category").value,
       condition: document.getElementById("book-condition").value,
       image: document.getElementById("book-image").value.trim(),
@@ -347,6 +386,9 @@
   function statusColor(s) {
     if(s === "Delivered") return "text-green-400 bg-green-500/10";
     if(s === "Shipped") return "text-blue-400 bg-blue-500/10";
+    if(s === "Pending Verification") return "text-orange-400 bg-orange-500/10";
+    if(s === "Rejected") return "text-red-400 bg-red-500/10";
+    if(s === "paid") return "text-emerald-400 bg-emerald-500/10";
     return "text-yellow-400 bg-yellow-500/10";
   }
 
@@ -358,25 +400,48 @@
     }
     el.innerHTML = orders.map(o => {
       const date = o.createdAt ? new Date(o.createdAt.seconds * 1000).toLocaleDateString() : "—";
-      const s = o.status || "Pending";
+      const s = o.status || o.paymentStatus || "Pending";
+      const payMethod = o.paymentMethod || "—";
+      const payStatus = o.paymentStatus || "—";
+      const hasProof = o.paymentProofUrl && o.paymentProofUrl.length > 0;
+      const isPendingVerification = payStatus === "Pending Verification";
+      
       return `
-        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+        <div class="bg-gray-900 border ${isPendingVerification ? 'border-orange-500/40 ring-1 ring-orange-500/20' : 'border-gray-800'} rounded-2xl p-6">
+          ${isPendingVerification ? '<div class="flex items-center gap-2 mb-4 text-orange-400 text-xs font-bold uppercase tracking-widest"><span>⚠️</span> Payment Verification Required</div>' : ''}
           <div class="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-4">
             <div>
               <p class="text-xs text-gray-500 uppercase tracking-widest mb-1">Customer</p>
-              <p class="font-bold">${o.email}</p>
-              <p class="text-xs text-gray-500 mt-1">${date} · ${o.address || '—'}</p>
+              <p class="font-bold">${o.userName || o.email}</p>
+              <p class="text-xs text-gray-500 mt-1">${o.email} · ${o.phone || '—'}</p>
+              <p class="text-xs text-gray-500 mt-1">📍 ${o.address || '—'}</p>
+              <p class="text-xs text-gray-500 mt-1">📅 ${date} · 💳 ${payMethod}</p>
+              ${o.upiTransactionId ? `<p class="text-xs text-blue-400 mt-1">UPI Txn: ${o.upiTransactionId}</p>` : ''}
             </div>
-            <div class="flex items-center gap-3">
+            <div class="flex flex-col items-end gap-2">
+              <span class="text-xs px-3 py-1 rounded-full font-bold ${statusColor(payStatus)}">${payStatus}</span>
               <select onchange="updateOrderStatus('${o.id}', this.value)" class="bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-xs outline-none">
-                <option ${s==='Pending'?'selected':''}>Pending</option>
+                <option ${s==='placed'?'selected':''}>placed</option>
+                <option ${s==='Pending Verification'?'selected':''}>Pending Verification</option>
                 <option ${s==='Shipped'?'selected':''}>Shipped</option>
                 <option ${s==='Delivered'?'selected':''}>Delivered</option>
+                <option ${s==='Rejected'?'selected':''}>Rejected</option>
               </select>
-              <span class="text-xs px-3 py-1 rounded-full font-bold ${statusColor(s)}">${s}</span>
-              <button onclick="deleteOrder('${o.id}')" class="text-gray-600 hover:text-red-400 text-xs font-bold">✕</button>
+              <button onclick="deleteOrder('${o.id}')" class="text-gray-600 hover:text-red-400 text-xs font-bold">✕ Delete</button>
             </div>
           </div>
+          ${hasProof ? `
+            <div class="border-t border-gray-800 pt-4 mb-4">
+              <p class="text-xs text-gray-500 uppercase tracking-widest mb-2">Payment Proof</p>
+              <img src="${o.paymentProofUrl}" alt="Payment proof" class="max-h-40 rounded-xl border border-gray-700 cursor-pointer hover:opacity-80" onclick="window.open(this.src, '_blank')" />
+            </div>
+          ` : ''}
+          ${isPendingVerification ? `
+            <div class="flex gap-3 mb-4">
+              <button onclick="verifyPayment('${o.id}')" class="flex-1 bg-green-600 hover:bg-green-500 text-white py-2 rounded-xl text-xs font-bold transition-all">✓ Verify Payment</button>
+              <button onclick="rejectPayment('${o.id}')" class="flex-1 bg-red-600/20 hover:bg-red-600/40 text-red-400 py-2 rounded-xl text-xs font-bold transition-all">✕ Reject</button>
+            </div>
+          ` : ''}
           <div class="border-t border-gray-800 pt-4 flex justify-between items-end">
             <div class="text-xs text-gray-500 space-y-0.5">
               ${(o.items||[]).map(i => `<p>${i.name} × ${i.qty}</p>`).join("")}
@@ -396,12 +461,42 @@
   window.updateOrderStatus = async (id, status) => {
     await updateDoc(doc(db, "orders", id), { status });
     await loadOrders();
+    updateDashboard();
+  };
+
+  // Verify UPI payment — marks as paid and moves to processing
+  window.verifyPayment = async (id) => {
+    if(!confirm("Confirm this payment has been received?")) return;
+    await updateDoc(doc(db, "orders", id), {
+      paymentStatus: "Verified",
+      status: "placed",
+      verifiedAt: new Date().toISOString(),
+      verifiedBy: currentUser?.email || "admin"
+    });
+    alert("Payment verified! Order is now active.");
+    await loadOrders();
+    updateDashboard();
+  };
+
+  // Reject payment
+  window.rejectPayment = async (id) => {
+    if(!confirm("Reject this payment? The order will be cancelled.")) return;
+    await updateDoc(doc(db, "orders", id), {
+      paymentStatus: "Rejected",
+      status: "Rejected",
+      rejectedAt: new Date().toISOString(),
+      rejectedBy: currentUser?.email || "admin"
+    });
+    alert("Payment rejected. Order cancelled.");
+    await loadOrders();
+    updateDashboard();
   };
 
   window.deleteOrder = async (id) => {
-    if(!confirm("Delete this order?")) return;
+    if(!confirm("Delete this order permanently?")) return;
     await deleteDoc(doc(db, "orders", id));
     await loadOrders();
+    updateDashboard();
   };
 
   // ── DASHBOARD ─────────────────────────────────────────────────────────
@@ -465,6 +560,78 @@
       },
       options: { plugins: { legend: { labels: { color: "#9ca3af" } } } }
     });
+  }
+
+  // ── USERS ─────────────────────────────────────────────────────────────
+  async function loadUsers() {
+    try {
+      const snap = await getDocs(collection(db, "users"));
+      const users = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      const el = document.getElementById("users-list");
+      if (!users.length) {
+        el.innerHTML = `<div class="py-16 text-center text-gray-500">No registered users yet.</div>`;
+        return;
+      }
+      el.innerHTML = users.map(u => `
+        <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <div class="w-10 h-10 rounded-full bg-green-600/20 text-green-400 flex items-center justify-center font-bold text-sm">
+              ${(u.name || 'U')[0].toUpperCase()}
+            </div>
+            <div>
+              <p class="font-bold text-sm">${u.name || 'Unknown'}</p>
+              <p class="text-xs text-gray-500">${u.email || '—'}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-4">
+            <span class="text-xs text-gray-500">${u.phone || '—'}</span>
+            <span class="text-[10px] px-3 py-1 rounded-full font-bold ${u.role === 'admin' ? 'bg-yellow-500/10 text-yellow-400' : 'bg-blue-500/10 text-blue-400'}">${u.role || 'user'}</span>
+            <span class="text-[10px] text-gray-600">${u.registeredAt ? new Date(u.registeredAt).toLocaleDateString() : '—'}</span>
+          </div>
+        </div>
+      `).join("");
+
+      // Update dashboard stat
+      const userStat = document.getElementById("stat-users");
+      if (userStat) userStat.textContent = users.length;
+    } catch(e) {
+      console.error("Load users error:", e);
+      document.getElementById("users-list").innerHTML = `<p class="text-red-400 text-sm">Could not load users. Check Firestore rules.</p>`;
+    }
+  }
+
+  // ── REVIEWS ───────────────────────────────────────────────────────────
+  async function loadReviews() {
+    try {
+      const snap = await getDocs(collection(db, "reviews"));
+      const reviews = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      const el = document.getElementById("reviews-list");
+      if (!reviews.length) {
+        el.innerHTML = `<div class="py-16 text-center text-gray-500">No reviews yet. Reviews will appear here once customers submit them.</div>`;
+        return;
+      }
+      el.innerHTML = reviews.map(r => {
+        const stars = '★'.repeat(r.rating || 0) + '☆'.repeat(5 - (r.rating || 0));
+        return `
+          <div class="bg-gray-900 border border-gray-800 rounded-2xl p-6">
+            <div class="flex items-start justify-between mb-3">
+              <div>
+                <p class="font-bold text-sm">${r.userName || r.email || 'Anonymous'}</p>
+                <p class="text-yellow-400 text-sm tracking-wider">${stars}</p>
+              </div>
+              <div class="text-right">
+                <p class="text-xs text-gray-500">${r.bookTitle || '—'}</p>
+                <p class="text-[10px] text-gray-600">${r.createdAt ? new Date(r.createdAt.seconds ? r.createdAt.seconds * 1000 : r.createdAt).toLocaleDateString() : '—'}</p>
+              </div>
+            </div>
+            <p class="text-sm text-gray-300">${r.comment || 'No comment.'}</p>
+          </div>
+        `;
+      }).join("");
+    } catch(e) {
+      console.error("Load reviews error:", e);
+      document.getElementById("reviews-list").innerHTML = `<p class="text-gray-500 text-sm">No reviews collection found yet.</p>`;
+    }
   }
 
   // ── Global Search ──────────────────────────────────────────────────────

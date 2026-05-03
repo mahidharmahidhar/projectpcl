@@ -11,12 +11,13 @@ const connectDB = async () => {
     try {
         await sequelize.authenticate();
         console.log('SQLite Database Connected...');
-        
+
         // Sync models
         await sequelize.sync({ alter: true });
         console.log('Models synchronized successfully.');
     } catch (error) {
         console.error('SQLite Connection Error:', error.message);
+        console.error('Full error:', error);
         process.exit(1);
     }
 };

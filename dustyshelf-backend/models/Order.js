@@ -15,15 +15,31 @@ const Order = sequelize.define('Order', {
         type: DataTypes.ENUM('Pending', 'Paid', 'Failed'),
         defaultValue: 'Pending'
     },
+    paymentMethod: {
+        type: DataTypes.ENUM('UPI', 'Card', 'Other'),
+        defaultValue: 'UPI'
+    },
     razorpayOrderId: {
         type: DataTypes.STRING
     },
     razorpayPaymentId: {
         type: DataTypes.STRING
     },
+    upiTransactionId: {
+        type: DataTypes.STRING
+    },
+    buyerId: {
+        type: DataTypes.UUID,
+        allowNull: true
+    },
+    sellerId: {
+        type: DataTypes.UUID,
+        allowNull: true
+    },
     shippingAddress: {
         type: DataTypes.JSON, // SQLite supports JSON via string but Sequelize handles it
-        allowNull: false
+        allowNull: true,
+        defaultValue: {}
     },
     paidAt: {
         type: DataTypes.DATE

@@ -45,6 +45,11 @@ const Book = sequelize.define('Book', {
             min: 1,
             max: 5
         }
+    },
+    sellerId: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        defaultValue: null
     }
 });
 

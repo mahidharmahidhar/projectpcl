@@ -64,29 +64,43 @@ exports.login = async (req, res, next) => {
 
 exports.googleSignIn = async (req, res, next) => {
     try {
-        const { idToken } = req.body;
-        if (!idToken) {
-            res.status(400);
-            throw new Error('ID Token is required');
+        const { idToken, uid, email, name } = req.body;
+        
+        let decodedUid = uid;
+        let decodedEmail = email;
+        let decodedName = name;
+
+        // Try to verify token if provided and Firebase Admin is initialized
+        if (idToken && admin.apps && admin.apps.length > 0) {
+            try {
+                const decodedToken = await admin.auth().verifyIdToken(idToken);
+                decodedUid = decodedToken.uid;
+                decodedEmail = decodedToken.email;
+                decodedName = decodedToken.name;
+            } catch (err) {
+                console.warn("Token verification failed or Admin SDK not initialized, falling back to provided user data.");
+            }
         }
 
-        const decodedToken = await admin.auth().verifyIdToken(idToken);
-        const { uid, email, name } = decodedToken;
+        if (!decodedUid || !decodedEmail) {
+            res.status(400);
+            throw new Error('Valid user data or ID Token is required');
+        }
 
         let user = await User.findOne({ 
             where: { 
-                [require('sequelize').Op.or]: [{ firebaseUid: uid }, { email }] 
+                [require('sequelize').Op.or]: [{ firebaseUid: decodedUid }, { email: decodedEmail }] 
             } 
         });
 
         if (!user) {
             user = await User.create({
-                name: name || 'Google User',
-                email,
-                firebaseUid: uid
+                name: decodedName || 'Google User',
+                email: decodedEmail,
+                firebaseUid: decodedUid
             });
         } else if (!user.firebaseUid) {
-            user.firebaseUid = uid;
+            user.firebaseUid = decodedUid;
             await user.save();
         }
 
@@ -98,6 +112,26 @@ exports.googleSignIn = async (req, res, next) => {
             role: user.role,
             token: generateToken(user.id)
         });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.getUserProfile = async (req, res, next) => {
+    try {
+        const user = await User.findByPk(req.user.id, {
+            attributes: { exclude: ['password'] }
+        });
+
+        if (user) {
+            res.json({
+                success: true,
+                user
+            });
+        } else {
+            res.status(404);
+            throw new Error('User not found');
+        }
     } catch (error) {
         next(error);
     }

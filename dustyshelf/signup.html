@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Join — DustyShelf</title>
+  <meta name="description" content="Create your DustyShelf account and start collecting curated second-hand classics." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
@@ -18,71 +19,428 @@
       }
     }
   </script>
+  <style>
+    .serif { font-family: 'Playfair Display', serif; }
+    .field-group { position: relative; }
+    .field-input {
+      transition: border-color 0.3s, box-shadow 0.3s;
+      border-bottom: 1.5px solid #e5e7eb;
+    }
+    .field-input:focus { border-color: #B8860B; box-shadow: 0 2px 0 0 #B8860B; }
+    .field-input.valid { border-color: #16a34a; }
+    .field-input.invalid { border-color: #dc2626; }
+    .field-msg {
+      font-size: 11px; margin-top: 4px; min-height: 16px;
+      transition: all 0.25s ease;
+    }
+    .field-msg.success { color: #16a34a; }
+    .field-msg.error { color: #dc2626; }
+    .field-icon {
+      position: absolute; right: 0; top: 50%; transform: translateY(-50%);
+      width: 20px; height: 20px; transition: all 0.25s;
+    }
+    .btn-loading { pointer-events: none; opacity: 0.8; }
+    .btn-loading::after {
+      content: ''; display: inline-block; width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3); border-top-color: white;
+      border-radius: 50%; margin-left: 10px; vertical-align: middle;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .shake { animation: shake 0.4s ease; }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+    /* Password rules checklist */
+    .pwd-rule { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #7D6B5D; transition: all 0.2s; }
+    .pwd-rule.pass { color: #16a34a; }
+    .pwd-rule.pass .rule-dot { background: #16a34a; }
+    .rule-dot { width: 6px; height: 6px; border-radius: 50%; background: #d1d5db; transition: all 0.2s; flex-shrink: 0; }
+    /* Strength bar */
+    .str-bar { height: 3px; flex: 1; border-radius: 4px; background: #e5e7eb; transition: all 0.3s; }
+  </style>
 </head>
 
 <body class="bg-parchment text-ink min-h-screen flex flex-col md:flex-row">
 
-  <!-- Left: Aesthetics -->
+  <!-- Left Panel: Decorative -->
   <div class="hidden md:flex md:w-1/2 bg-forest relative overflow-hidden items-center justify-center p-12">
     <div class="relative z-10 text-center">
       <h2 class="serif text-parchment text-6xl font-bold leading-tight mb-6">Become a <br/><span class="italic font-normal">collector.</span></h2>
       <p class="text-parchment/60 font-sans tracking-widest uppercase text-xs font-bold">The Journey Begins Here</p>
+      <div class="mt-12 flex justify-center gap-6">
+        <div class="text-center">
+          <p class="text-3xl font-bold text-gold">500+</p>
+          <p class="text-parchment/40 text-[10px] uppercase tracking-widest mt-1">Curated Books</p>
+        </div>
+        <div class="w-px bg-parchment/10"></div>
+        <div class="text-center">
+          <p class="text-3xl font-bold text-gold">200+</p>
+          <p class="text-parchment/40 text-[10px] uppercase tracking-widest mt-1">Happy Readers</p>
+        </div>
+      </div>
     </div>
     <div class="absolute inset-0 opacity-10" style="background-image: url('https://www.transparenttextures.com/patterns/paper.png');"></div>
     <div class="absolute -top-20 -right-20 w-80 h-80 bg-gold/20 rounded-full blur-3xl"></div>
+    <div class="absolute -bottom-32 -left-32 w-96 h-96 bg-parchment/5 rounded-full blur-3xl"></div>
   </div>
 
-  <!-- Right: Form -->
-  <div class="flex-1 flex items-center justify-center p-8 bg-parchment">
-    <div class="max-w-sm w-full">
-      <div class="text-center md:text-left mb-12">
-        <a href="index.html" class="serif text-3xl font-black tracking-tighter mb-8 inline-block">Dusty<span class="italic font-normal">Shelf</span></a>
-        <h3 class="serif text-4xl font-bold text-forest mb-2">Create Account</h3>
+  <!-- Right Panel: Registration Form -->
+  <div class="flex-1 flex items-center justify-center p-6 sm:p-8 bg-parchment overflow-y-auto">
+    <div class="max-w-[400px] w-full py-4">
+      <div class="text-center md:text-left mb-8">
+        <a href="index.html" class="serif text-3xl font-black tracking-tighter mb-6 inline-block">Dusty<span class="italic font-normal">Shelf</span></a>
+        <h3 class="serif text-3xl sm:text-4xl font-bold text-forest mb-2">Create Account</h3>
         <p class="text-clay text-sm">Join our community of book lovers.</p>
       </div>
 
-      <div class="space-y-6">
-        <div>
-          <label class="block text-[10px] font-black uppercase tracking-widest text-clay mb-2">Email Address</label>
-          <input id="email" type="email" placeholder="you@library.com" class="w-full bg-transparent border-b border-gray-200 py-3 text-sm outline-none focus:border-gold transition-all" />
-        </div>
-        <div>
-          <label class="block text-[10px] font-black uppercase tracking-widest text-clay mb-2">Create Password</label>
-          <input id="password" type="password" placeholder="Min. 6 characters" class="w-full bg-transparent border-b border-gray-200 py-3 text-sm outline-none focus:border-gold transition-all" />
+      <!-- Global Error -->
+      <div id="global-error" class="hidden mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-2xl text-sm font-medium"></div>
+
+      <div class="space-y-5">
+
+        <!-- Full Name -->
+        <div class="field-group">
+          <label class="block text-[10px] font-black uppercase tracking-widest text-clay mb-2">Full Name *</label>
+          <div class="relative">
+            <input id="fullname" type="text" placeholder="John Doe" autocomplete="name"
+              class="field-input w-full bg-transparent py-3 text-sm outline-none pr-8" />
+            <span id="fullname-icon" class="field-icon"></span>
+          </div>
+          <p id="fullname-msg" class="field-msg"></p>
         </div>
 
-        <button onclick="signup()" class="w-full bg-forest text-parchment py-4 rounded-full font-bold text-xs uppercase tracking-widest hover:bg-ink transition-all shadow-xl shadow-forest/10 mt-4">
+        <!-- Email -->
+        <div class="field-group">
+          <label class="block text-[10px] font-black uppercase tracking-widest text-clay mb-2">Email Address *</label>
+          <div class="relative">
+            <input id="email" type="email" placeholder="you@example.com" autocomplete="email"
+              class="field-input w-full bg-transparent py-3 text-sm outline-none pr-8" />
+            <span id="email-icon" class="field-icon"></span>
+          </div>
+          <p id="email-msg" class="field-msg"></p>
+        </div>
+
+        <!-- Indian Mobile Number -->
+        <div class="field-group">
+          <label class="block text-[10px] font-black uppercase tracking-widest text-clay mb-2">Mobile Number (India) *</label>
+          <div class="relative flex items-center">
+            <span class="text-sm text-clay font-semibold mr-2 select-none">+91</span>
+            <input id="phone" type="tel" placeholder="98765 43210" maxlength="14" autocomplete="tel"
+              class="field-input flex-1 bg-transparent py-3 text-sm outline-none pr-8" />
+            <span id="phone-icon" class="field-icon"></span>
+          </div>
+          <p id="phone-msg" class="field-msg"></p>
+        </div>
+
+        <!-- Password -->
+        <div class="field-group">
+          <label class="block text-[10px] font-black uppercase tracking-widest text-clay mb-2">Password *</label>
+          <div class="relative">
+            <input id="password" type="password" placeholder="Create a strong password" autocomplete="new-password"
+              class="field-input w-full bg-transparent py-3 text-sm outline-none pr-8" />
+            <button type="button" id="togglePwd1" class="absolute right-0 top-1/2 -translate-y-1/2 text-clay hover:text-ink transition-colors p-1">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+            </button>
+          </div>
+          <!-- Strength bar -->
+          <div class="flex gap-1 mt-2">
+            <div id="str-1" class="str-bar"></div>
+            <div id="str-2" class="str-bar"></div>
+            <div id="str-3" class="str-bar"></div>
+            <div id="str-4" class="str-bar"></div>
+          </div>
+          <p id="str-label" class="text-[10px] text-clay mt-1"></p>
+          <!-- Password rules checklist -->
+          <div class="mt-2 space-y-1">
+            <div id="rule-len" class="pwd-rule"><span class="rule-dot"></span>Minimum 8 characters</div>
+            <div id="rule-upper" class="pwd-rule"><span class="rule-dot"></span>Uppercase letter (A-Z)</div>
+            <div id="rule-lower" class="pwd-rule"><span class="rule-dot"></span>Lowercase letter (a-z)</div>
+            <div id="rule-num" class="pwd-rule"><span class="rule-dot"></span>Number (0-9)</div>
+            <div id="rule-special" class="pwd-rule"><span class="rule-dot"></span>Special character (!@#$...)</div>
+          </div>
+        </div>
+
+        <!-- Confirm Password -->
+        <div class="field-group">
+          <label class="block text-[10px] font-black uppercase tracking-widest text-clay mb-2">Confirm Password *</label>
+          <div class="relative">
+            <input id="confirm-password" type="password" placeholder="Re-enter your password" autocomplete="new-password"
+              class="field-input w-full bg-transparent py-3 text-sm outline-none pr-8" />
+            <button type="button" id="togglePwd2" class="absolute right-0 top-1/2 -translate-y-1/2 text-clay hover:text-ink transition-colors p-1">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+            </button>
+          </div>
+          <p id="confirm-msg" class="field-msg"></p>
+        </div>
+
+        <!-- Register Button -->
+        <button id="signupBtn" class="w-full bg-forest text-parchment py-4 rounded-full font-bold text-xs uppercase tracking-widest hover:bg-ink transition-all shadow-xl shadow-forest/10 mt-2 flex items-center justify-center">
           Register Now
         </button>
 
-        <p class="text-center text-xs text-clay font-medium pt-4">
+        <!-- Google Signup -->
+        <button id="googleSignupBtn" class="w-full bg-white border border-gray-200 text-ink py-4 rounded-full font-bold text-xs uppercase tracking-widest hover:bg-gray-50 transition-all shadow-md flex items-center justify-center gap-2">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          Sign up with Google
+        </button>
+
+        <p class="text-center text-xs text-clay font-medium pt-2">
           Already a member? <a href="login.html" class="text-gold font-bold hover:underline">Sign in here</a>
         </p>
       </div>
     </div>
   </div>
 
-<script>
-function signup(){
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
+<script type="module">
+import {
+  signUpWithEmail, signInWithGoogle, checkEmailExists,
+  validateEmail, validateIndianPhone, validatePassword, validateName
+} from './js/auth.js';
+import { showToast, showSuccessPopup } from './js/toast.js';
 
-  if(!email || !password){
-    alert("Please fill all fields");
-    return;
+// ── DOM refs ────────────────────────────────────────────────────────────────
+const fields = {
+  fullname: document.getElementById('fullname'),
+  email: document.getElementById('email'),
+  phone: document.getElementById('phone'),
+  password: document.getElementById('password'),
+  confirmPwd: document.getElementById('confirm-password'),
+};
+
+// ── Helper: set field state ─────────────────────────────────────────────────
+function setFieldState(fieldId, state, message) {
+  const input = document.getElementById(fieldId);
+  const msgEl = document.getElementById(fieldId + '-msg') || document.getElementById('confirm-msg');
+  const iconEl = document.getElementById(fieldId + '-icon');
+  
+  input.classList.remove('valid', 'invalid');
+  if (state === 'success') {
+    input.classList.add('valid');
+    if (msgEl) { msgEl.textContent = message; msgEl.className = 'field-msg success'; }
+    if (iconEl) iconEl.innerHTML = '<svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>';
+  } else if (state === 'error') {
+    input.classList.add('invalid');
+    if (msgEl) { msgEl.textContent = message; msgEl.className = 'field-msg error'; }
+    if (iconEl) iconEl.innerHTML = '<svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>';
+  } else {
+    if (msgEl) { msgEl.textContent = ''; msgEl.className = 'field-msg'; }
+    if (iconEl) iconEl.innerHTML = '';
   }
-
-  if(password.length < 6){
-    alert("Password must be at least 6 characters");
-    return;
-  }
-
-  const user = { email, password };
-  localStorage.setItem("user", JSON.stringify(user));
-
-  alert("Welcome to the Collective! Please login.");
-  window.location.href = "login.html";
 }
+
+// ── Global error ────────────────────────────────────────────────────────────
+function showGlobalError(msg) {
+  const el = document.getElementById('global-error');
+  el.textContent = msg; el.classList.remove('hidden');
+  el.classList.add('shake');
+  setTimeout(() => el.classList.remove('shake'), 500);
+}
+function hideGlobalError() { document.getElementById('global-error').classList.add('hidden'); }
+
+// ── Validation state tracker ────────────────────────────────────────────────
+const validState = { fullname: false, email: false, phone: false, password: false, confirmPwd: false };
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// REAL-TIME VALIDATION ON EACH FIELD
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// Full Name
+fields.fullname.addEventListener('input', () => {
+  const result = validateName(fields.fullname.value);
+  validState.fullname = result.valid;
+  if (!fields.fullname.value) { setFieldState('fullname', 'clear', ''); return; }
+  setFieldState('fullname', result.valid ? 'success' : 'error', result.message);
+});
+
+// Email — validate format + check if already registered
+let emailDebounce = null;
+fields.email.addEventListener('input', () => {
+  clearTimeout(emailDebounce);
+  const val = fields.email.value.trim();
+  if (!val) { setFieldState('email', 'clear', ''); validState.email = false; return; }
+  
+  const formatCheck = validateEmail(val);
+  if (!formatCheck.valid) {
+    setFieldState('email', 'error', 'Invalid email format.');
+    validState.email = false;
+    return;
+  }
+  
+  // Show checking state
+  const msgEl = document.getElementById('email-msg');
+  msgEl.textContent = 'Checking availability...';
+  msgEl.className = 'field-msg';
+  
+  // Debounce the Firebase check
+  emailDebounce = setTimeout(async () => {
+    try {
+      const exists = await checkEmailExists(val);
+      if (exists) {
+        setFieldState('email', 'error', 'Email already registered. Please login instead.');
+        validState.email = false;
+      } else {
+        setFieldState('email', 'success', 'Valid email ✓');
+        validState.email = true;
+      }
+    } catch {
+      // If check fails, still allow — Firebase will catch on registration
+      setFieldState('email', 'success', 'Valid email format.');
+      validState.email = true;
+    }
+  }, 600);
+});
+
+// Indian Mobile Number
+fields.phone.addEventListener('input', () => {
+  let val = fields.phone.value.trim();
+  if (!val) { setFieldState('phone', 'clear', ''); validState.phone = false; return; }
+  
+  // Auto-prepend context: the +91 prefix is shown visually, so validate the raw number
+  const result = validateIndianPhone(val);
+  validState.phone = result.valid;
+  setFieldState('phone', result.valid ? 'success' : 'error', result.message);
+});
+
+// Password — real-time strength + rules checklist
+fields.password.addEventListener('input', () => {
+  const val = fields.password.value;
+  if (!val) {
+    setFieldState('password', 'clear', '');
+    document.querySelectorAll('.pwd-rule').forEach(r => r.classList.remove('pass'));
+    document.querySelectorAll('.str-bar').forEach(b => b.style.background = '#e5e7eb');
+    document.getElementById('str-label').textContent = '';
+    validState.password = false;
+    return;
+  }
+  
+  const result = validatePassword(val);
+  validState.password = result.valid;
+  
+  // Update rule checklist
+  document.getElementById('rule-len').classList.toggle('pass', val.length >= 8);
+  document.getElementById('rule-upper').classList.toggle('pass', /[A-Z]/.test(val));
+  document.getElementById('rule-lower').classList.toggle('pass', /[a-z]/.test(val));
+  document.getElementById('rule-num').classList.toggle('pass', /[0-9]/.test(val));
+  document.getElementById('rule-special').classList.toggle('pass', /[^A-Za-z0-9]/.test(val));
+  
+  // Update strength bar
+  const colors = ['#dc2626', '#f59e0b', '#eab308', '#16a34a'];
+  for (let i = 1; i <= 4; i++) {
+    document.getElementById(`str-${i}`).style.background = i <= result.strength ? colors[result.strength - 1] : '#e5e7eb';
+  }
+  document.getElementById('str-label').textContent = result.label;
+  
+  // Also re-check confirm password if it has value
+  if (fields.confirmPwd.value) { fields.confirmPwd.dispatchEvent(new Event('input')); }
+});
+
+// Confirm Password
+fields.confirmPwd.addEventListener('input', () => {
+  const val = fields.confirmPwd.value;
+  if (!val) { setFieldState('confirm-password', 'clear', ''); validState.confirmPwd = false; return; }
+  
+  if (val !== fields.password.value) {
+    document.getElementById('confirm-msg').textContent = 'Passwords do not match.';
+    document.getElementById('confirm-msg').className = 'field-msg error';
+    fields.confirmPwd.classList.add('invalid');
+    fields.confirmPwd.classList.remove('valid');
+    validState.confirmPwd = false;
+  } else {
+    document.getElementById('confirm-msg').textContent = 'Passwords match ✓';
+    document.getElementById('confirm-msg').className = 'field-msg success';
+    fields.confirmPwd.classList.add('valid');
+    fields.confirmPwd.classList.remove('invalid');
+    validState.confirmPwd = true;
+  }
+});
+
+// ── Password visibility toggles ─────────────────────────────────────────────
+document.getElementById('togglePwd1').addEventListener('click', () => {
+  fields.password.type = fields.password.type === 'password' ? 'text' : 'password';
+});
+document.getElementById('togglePwd2').addEventListener('click', () => {
+  fields.confirmPwd.type = fields.confirmPwd.type === 'password' ? 'text' : 'password';
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// REGISTRATION SUBMIT
+// ═══════════════════════════════════════════════════════════════════════════════
+document.getElementById('signupBtn').addEventListener('click', async () => {
+  hideGlobalError();
+  
+  // Trigger all validations
+  fields.fullname.dispatchEvent(new Event('input'));
+  fields.email.dispatchEvent(new Event('input'));
+  fields.phone.dispatchEvent(new Event('input'));
+  fields.password.dispatchEvent(new Event('input'));
+  fields.confirmPwd.dispatchEvent(new Event('input'));
+  
+  // Wait for async email check
+  await new Promise(r => setTimeout(r, 700));
+  
+  // Check all validations
+  if (!validState.fullname) { showGlobalError('Please enter a valid full name.'); return; }
+  if (!validState.email) { showGlobalError('Please enter a valid, unregistered email.'); return; }
+  if (!validState.phone) { showGlobalError('Enter a valid Indian mobile number (10 digits starting with 6-9).'); return; }
+  if (!validState.password) { showGlobalError('Password does not meet all requirements.'); return; }
+  if (!validState.confirmPwd) { showGlobalError('Passwords do not match.'); return; }
+  
+  const btn = document.getElementById('signupBtn');
+  try {
+    btn.classList.add('btn-loading');
+    btn.textContent = 'Creating Account';
+    
+    // Register with Firebase directly (no backend needed)
+    // Note: signUpWithEmail sends a verification email then signs the user OUT,
+    // so we redirect to login (not dashboard) and ask them to verify first.
+    await signUpWithEmail(
+      fields.email.value.trim(),
+      fields.password.value,
+      fields.fullname.value.trim()
+    );
+
+    // Show success popup → redirect to login with verification notice
+    showSuccessPopup(
+      "Account Created!",
+      `A verification email has been sent to ${fields.email.value.trim()}. Please verify your email, then log in.`,
+      {
+        redirectUrl: "login.html",
+        redirectDelay: 3000,
+        buttonText: "Go to Login"
+      }
+    );
+    
+  } catch (error) {
+    showGlobalError(error.message);
+    showToast(error.message, 'error');
+    btn.classList.remove('btn-loading');
+    btn.textContent = 'Register Now';
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// GOOGLE SIGN-UP
+// ═══════════════════════════════════════════════════════════════════════════════
+document.getElementById('googleSignupBtn').addEventListener('click', async () => {
+  hideGlobalError();
+  try {
+    // signInWithGoogle handles localStorage internally in auth.js
+    const user = await signInWithGoogle();
+    if (user) {
+      showSuccessPopup("Welcome to DustyShelf!", "Your Google account has been linked successfully.", {
+        redirectUrl: "dashboard.html",
+        redirectDelay: 2000,
+      });
+    }
+  } catch (error) {
+    showGlobalError(error.message);
+    showToast(error.message, 'error');
+  }
+});
 </script>
 
 </body>

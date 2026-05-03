@@ -3,319 +3,312 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="DustyShelf — Curated second-hand books at unbeatable prices. Fiction, classics, self-help and more." />
   <title>DustyShelf — Curated Second-Hand Classics</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            parchment: '#FDFCF8',
-            ink: '#1A1A1A',
-            forest: '#1A3C34',
-            gold: '#B8860B',
-            clay: '#7D6B5D',
-          },
-          fontFamily: {
-            serif: ['"Playfair Display"', 'serif'],
-            sans: ['Inter', 'sans-serif'],
-          }
-        }
-      }
-    }
-  </script>
-  <style>
-    body { background-color: #FDFCF8; color: #1A1A1A; font-family: 'Inter', sans-serif; }
-    .serif { font-family: 'Playfair Display', serif; }
-    .book-card { transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1); border-bottom: 1px solid transparent; }
-    .book-card:hover { transform: translateY(-8px); border-bottom-color: #B8860B; }
-    .nav-link::after { content: ''; position: absolute; width: 0; height: 1px; bottom: -2px; left: 0; background-color: #B8860B; transition: width 0.3s; }
-    .nav-link:hover::after { width: 100%; }
-    ::-webkit-scrollbar { width: 8px; }
-    ::-webkit-scrollbar-track { background: #FDFCF8; }
-    ::-webkit-scrollbar-thumb { background: #D1D1D1; border-radius: 10px; }
-    ::-webkit-scrollbar-thumb:hover { background: #B8860B; }
-  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css" />
 </head>
 
-<body class="bg-parchment text-ink min-h-screen">
-  <!-- Page protection -->
-  <script>
-    if(localStorage.getItem("loggedIn") !== "true"){
-      window.location.href = "login.html";
-    }
-  </script>
+<body>
 
-  <!-- ── Navigation ──────────────────────────────────────────────────────────── -->
-  <nav class="sticky top-0 z-50 bg-parchment/90 backdrop-blur-md border-b border-gray-100">
-    <div class="max-w-7xl mx-auto px-6 lg:px-12 h-20 flex items-center justify-between">
-      <!-- Logo -->
-      <a href="index.html" class="serif text-2xl font-black tracking-tighter flex items-center gap-2">
-        <span class="text-gold">📖</span>
-        <span>Dusty<span class="italic font-normal">Shelf</span></span>
+  <!-- ── Navigation ──────────────────────────────────────────────────── -->
+  <nav class="site-nav" id="site-nav">
+    <div class="nav-inner">
+      <a href="index.html" class="logo">
+        <span class="logo-icon">📖</span>
+        <span class="logo-text">Dusty<span class="logo-italic">Shelf</span></span>
       </a>
 
-      <!-- Desktop Links -->
-      <div class="hidden md:flex items-center gap-10 text-[13px] uppercase tracking-[0.2em] font-semibold text-clay">
-        <a href="index.html" class="nav-link relative text-ink">Collection</a>
-        <a href="#about" class="nav-link relative">Our Story</a>
-        <a id="admin-link" href="admin.html" class="hidden nav-link relative text-forest font-bold">Admin Panel</a>
+      <div class="nav-links" id="nav-links">
+        <a href="index.html" class="nav-link active">Collection</a>
+        <a href="#about" class="nav-link">Our Story</a>
+        <a id="dashboard-link" href="dashboard.html" class="nav-link nav-link--gold hidden">My Account</a>
+        <a id="admin-link" href="admin.html" class="nav-link nav-link--green hidden">Admin Panel</a>
       </div>
 
-      <!-- Actions -->
-      <div class="flex items-center gap-6">
-        <div class="hidden lg:flex items-center bg-gray-50 border border-gray-100 rounded-full px-4 py-1.5 focus-within:border-gold transition-all">
-          <input id="search-input" type="text" placeholder="Search classics..." class="bg-transparent text-sm w-32 outline-none italic" />
-          <svg class="w-4 h-4 text-clay" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <div class="nav-actions">
+        <div class="search-box">
+          <input id="search-input" type="text" placeholder="Search books..." />
+          <svg class="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
         </div>
-        
-        <a href="cart.html" class="relative group">
-          <svg class="w-6 h-6 text-ink group-hover:text-gold transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
-          <span id="cart-badge" class="absolute -top-2 -right-2 bg-forest text-white text-[9px] font-bold w-4 h-4 rounded-full flex items-center justify-center border border-parchment" style="display:none">0</span>
+
+        <a href="cart.html" class="cart-link" id="cart-link">
+          <svg class="cart-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+          <span id="cart-badge" class="cart-badge" style="display:none">0</span>
         </a>
 
-        <button onclick="logout()" class="group flex items-center gap-2 text-clay hover:text-ink transition-colors">
-          <span id="user-email" class="hidden sm:block text-xs font-medium"></span>
-          <svg class="w-5 h-5 opacity-60 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        <button id="auth-btn" class="auth-btn">
+          <span id="user-email">Login</span>
+          <svg class="auth-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        </button>
+
+        <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="Menu">
+          <span></span><span></span><span></span>
         </button>
       </div>
     </div>
   </nav>
 
-  <!-- ── Hero Section ───────────────────────────────────────────────────────── -->
-  <section class="relative overflow-hidden pt-16 pb-24 border-b border-gray-50">
-    <div class="max-w-7xl mx-auto px-6 lg:px-12 grid lg:grid-cols-2 gap-16 items-center">
-      <div>
-        <span class="serif italic text-gold text-xl mb-4 block">Est. 2024</span>
-        <h1 class="serif text-5xl lg:text-7xl font-bold leading-[1.1] mb-8 text-forest">
-          Where every page <br/>
-          <span class="italic font-normal">holds a memory.</span>
-        </h1>
-        <p class="text-clay text-lg max-w-md leading-relaxed mb-10">
-          Curating a rare collection of pre-loved literature, first editions, and forgotten stories for the modern bibliophile.
-        </p>
-        <div class="flex items-center gap-6">
-          <a href="#collection" class="bg-forest text-parchment px-10 py-4 rounded-full font-semibold hover:bg-ink transition-all shadow-xl shadow-forest/10">
-            Explore Collection
-          </a>
-          <a href="#about" class="serif italic border-b border-ink/20 hover:border-gold transition-all py-1">
-            Read our mission
-          </a>
+  <!-- ── Hero Section ────────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-text">
+        <span class="hero-tag">Est. 2024</span>
+        <h1 class="hero-title">Where every page <br/><span class="hero-title-italic">holds a memory.</span></h1>
+        <p class="hero-desc">Curating a rare collection of pre-loved literature, first editions, and forgotten stories for the modern bibliophile.</p>
+        <div class="hero-actions">
+          <a href="#collection" class="btn btn-primary">Explore Collection</a>
+          <a href="#about" class="btn btn-ghost">Read our mission</a>
         </div>
       </div>
-      <div class="relative">
-        <div class="aspect-[4/5] bg-gray-100 rounded-3xl overflow-hidden shadow-2xl rotate-2">
-          <img src="https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=1000&auto=format&fit=crop" class="w-full h-full object-cover grayscale-[0.2]" alt="Vintage Books" />
+      <div class="hero-visual">
+        <div class="hero-img-wrap">
+          <img src="https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=1000&auto=format&fit=crop" alt="Vintage Books" />
         </div>
-        <div class="absolute -bottom-8 -left-8 bg-gold p-8 rounded-2xl shadow-xl -rotate-3 hidden md:block">
-          <p class="serif text-parchment text-2xl font-bold italic">“Books are a uniquely portable magic.”</p>
-          <p class="text-parchment/80 text-xs mt-2 uppercase tracking-widest font-bold">— Stephen King</p>
+        <div class="hero-quote">
+          <p class="hero-quote-text">"Books are a uniquely portable magic."</p>
+          <p class="hero-quote-author">— Stephen King</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ── Shop Collection ────────────────────────────────────────────────────── -->
-  <main id="collection" class="max-w-7xl mx-auto px-6 lg:px-12 py-24">
-    
-    <!-- Filter Bar -->
-    <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
+  <!-- ── Shop Collection ─────────────────────────────────────────────── -->
+  <main id="collection" class="collection-section">
+    <div class="collection-header">
       <div>
-        <h2 class="serif text-4xl font-bold text-forest mb-2">The Library</h2>
-        <p class="text-clay italic">Filtered selection of our finest second-hand editions</p>
+        <h2 class="section-title">The Library</h2>
+        <p class="section-subtitle">Filtered selection of our finest second-hand editions</p>
       </div>
-      <div id="categories" class="flex gap-4 overflow-x-auto pb-2 no-scrollbar"></div>
+      <div id="categories" class="category-pills"></div>
     </div>
 
-    <!-- Grid -->
-    <div id="book-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-10 gap-y-20"></div>
+    <div id="book-grid" class="book-grid"></div>
 
-    <div id="no-results" class="hidden text-center py-32">
-      <div class="serif italic text-4xl text-clay mb-4">Finis.</div>
-      <p class="text-clay/60 uppercase tracking-widest text-xs font-bold">No editions found matching your request</p>
+    <div id="no-results" class="no-results hidden">
+      <div class="no-results-title">Finis.</div>
+      <p class="no-results-sub">No editions found matching your request</p>
     </div>
   </main>
 
-  <!-- ── Testimonials ───────────────────────────────────────────────────────── -->
-  <section class="bg-parchment py-24 border-y border-gray-50">
-    <div class="max-w-7xl mx-auto px-6 lg:px-12">
-      <div class="grid md:grid-cols-3 gap-12">
-        <div class="text-center p-8 bg-white/40 rounded-3xl border border-gray-100">
-          <div class="text-gold text-2xl mb-4">“</div>
-          <p class="serif italic text-xl text-forest mb-6">"The condition of the books is exceptional. Truly a gem for rare book hunters."</p>
-          <p class="text-xs font-bold uppercase tracking-widest text-clay">— Eleanor V.</p>
-        </div>
-        <div class="text-center p-8 bg-white/40 rounded-3xl border border-gray-100">
-          <div class="text-gold text-2xl mb-4">“</div>
-          <p class="serif italic text-xl text-forest mb-6">"Fast delivery and beautiful eco-friendly packaging. I'm in love with this brand."</p>
-          <p class="text-xs font-bold uppercase tracking-widest text-clay">— Julian R.</p>
-        </div>
-        <div class="text-center p-8 bg-white/40 rounded-3xl border border-gray-100">
-          <div class="text-gold text-2xl mb-4">“</div>
-          <p class="serif italic text-xl text-forest mb-6">"Finding an out-of-print classic here was the highlight of my month!"</p>
-          <p class="text-xs font-bold uppercase tracking-widest text-clay">— Sarah M.</p>
-        </div>
+  <!-- ── Product Quick View Modal ────────────────────────────────────── -->
+  <div id="product-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <button id="modal-close" class="modal-close" aria-label="Close">✕</button>
+      <div class="modal-body" id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- ── Testimonials ────────────────────────────────────────────────── -->
+  <section class="testimonials" id="about">
+    <div class="testimonials-inner">
+      <div class="testimonial-card">
+        <div class="tq">"</div>
+        <p class="tq-text">"The condition of the books is exceptional. Truly a gem for rare book hunters."</p>
+        <p class="tq-author">— Eleanor V.</p>
+      </div>
+      <div class="testimonial-card">
+        <div class="tq">"</div>
+        <p class="tq-text">"Fast delivery and beautiful eco-friendly packaging. I'm in love with this brand."</p>
+        <p class="tq-author">— Julian R.</p>
+      </div>
+      <div class="testimonial-card">
+        <div class="tq">"</div>
+        <p class="tq-text">"Finding an out-of-print classic here was the highlight of my month!"</p>
+        <p class="tq-author">— Sarah M.</p>
       </div>
     </div>
   </section>
 
-  <!-- ── Newsletter ─────────────────────────────────────────────────────────── -->
-  <section class="max-w-7xl mx-auto px-6 lg:px-12 py-24">
-    <div class="bg-forest rounded-[3rem] p-12 lg:p-20 text-center text-parchment relative overflow-hidden">
-      <div class="relative z-10">
-        <h2 class="serif text-4xl lg:text-5xl font-bold mb-6">Join The Literati</h2>
-        <p class="text-parchment/70 max-w-lg mx-auto mb-10 text-lg">Subscribe to our monthly journal and be the first to know about new collection arrivals.</p>
-        <div class="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-          <input type="email" placeholder="Your email address" class="flex-1 bg-white/10 border border-white/20 rounded-full px-6 py-4 outline-none focus:border-gold transition-all placeholder:text-parchment/40" />
-          <button class="bg-gold text-parchment px-10 py-4 rounded-full font-bold hover:scale-105 transition-all">Subscribe</button>
-        </div>
+  <!-- ── Newsletter ──────────────────────────────────────────────────── -->
+  <section class="newsletter">
+    <div class="newsletter-card">
+      <h2 class="newsletter-title">Join The Literati</h2>
+      <p class="newsletter-desc">Subscribe to our monthly journal and be the first to know about new collection arrivals.</p>
+      <div class="newsletter-form">
+        <input type="email" placeholder="Your email address" />
+        <button class="btn btn-gold">Subscribe</button>
       </div>
-      <!-- Decorative circle -->
-      <div class="absolute -top-20 -right-20 w-64 h-64 bg-gold/10 rounded-full blur-3xl"></div>
     </div>
   </section>
 
-  <!-- ── Footer ─────────────────────────────────────────────────────────────── -->
-  <footer class="bg-parchment border-t border-gray-100 py-16">
-    <div class="max-w-7xl mx-auto px-6 lg:px-12 grid grid-cols-1 md:grid-cols-4 gap-12">
-      <div class="md:col-span-1">
-        <a href="#" class="serif text-2xl font-black tracking-tighter mb-6 block">Dusty<span class="italic font-normal">Shelf</span></a>
-        <p class="text-clay text-sm leading-relaxed">Honoring the heritage of literature through curation and sustainability.</p>
+  <!-- ── Footer ──────────────────────────────────────────────────────── -->
+  <footer class="site-footer">
+    <div class="footer-grid">
+      <div>
+        <a href="#" class="logo logo--footer">Dusty<span class="logo-italic">Shelf</span></a>
+        <p class="footer-blurb">Honoring the heritage of literature through curation and sustainability.</p>
       </div>
       <div>
-        <h4 class="text-xs font-bold uppercase tracking-[0.2em] mb-6">Collection</h4>
-        <ul class="space-y-3 text-sm text-clay">
-          <li><a href="#" class="hover:text-gold transition-colors">Fiction</a></li>
-          <li><a href="#" class="hover:text-gold transition-colors">Classics</a></li>
-          <li><a href="#" class="hover:text-gold transition-colors">Rare Editions</a></li>
-        </ul>
+        <h4 class="footer-heading">Collection</h4>
+        <ul class="footer-links"><li><a href="#">Fiction</a></li><li><a href="#">Classics</a></li><li><a href="#">Rare Editions</a></li></ul>
       </div>
       <div>
-        <h4 class="text-xs font-bold uppercase tracking-[0.2em] mb-6">Company</h4>
-        <ul class="space-y-3 text-sm text-clay">
-          <li><a href="#" class="hover:text-gold transition-colors">Our Story</a></li>
-          <li><a href="#" class="hover:text-gold transition-colors">Sustainability</a></li>
-          <li><a href="#" class="hover:text-gold transition-colors">Contact</a></li>
-        </ul>
+        <h4 class="footer-heading">Company</h4>
+        <ul class="footer-links"><li><a href="#">Our Story</a></li><li><a href="#">Sustainability</a></li><li><a href="#">Contact</a></li></ul>
       </div>
       <div>
-        <h4 class="text-xs font-bold uppercase tracking-[0.2em] mb-6">Legal</h4>
-        <ul class="space-y-3 text-sm text-clay">
-          <li><a href="#" class="hover:text-gold transition-colors">Privacy</a></li>
-          <li><a href="#" class="hover:text-gold transition-colors">Terms</a></li>
-        </ul>
+        <h4 class="footer-heading">Legal</h4>
+        <ul class="footer-links"><li><a href="#">Privacy</a></li><li><a href="#">Terms</a></li></ul>
       </div>
     </div>
-    <div class="max-w-7xl mx-auto px-6 lg:px-12 mt-16 pt-8 border-t border-gray-50 flex justify-between items-center text-[10px] text-clay/60 font-bold uppercase tracking-widest">
+    <div class="footer-bottom">
       <p>© 2024 DUSTYSHELF COLLECTIVE</p>
-      <div class="flex gap-6">
-        <span>INSTAGRAM</span>
-        <span>TWITTER</span>
-      </div>
+      <div class="footer-socials"><span>INSTAGRAM</span><span>TWITTER</span></div>
     </div>
   </footer>
 
-  <script>
-    // ── Fetch Books from Firestore ──────────────────────────────────────────
-    import { db } from "./js/firebase-config.js";
-    import { collection, getDocs, query, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  <script type="module">
+    import { BOOKS, CATEGORIES } from "./js/books.js";
+    import { initAuthState, logOut, getCurrentUser } from "./js/auth.js";
+    import { addToCart as addToCartModule, updateCartBadge, migrateOldCart } from "./js/cart.js";
+    import { showToast } from "./js/toast.js";
+    import { rateBook, getBookRating, getUserBookRating, renderStars, renderInteractiveStars } from "./js/ratings.js";
 
-    let BOOKS = [];
+    // ── Mobile menu toggle ────────────────────────────────────────────
+    const menuBtn = document.getElementById("mobile-menu-btn");
+    const navLinks = document.getElementById("nav-links");
+    menuBtn?.addEventListener("click", () => {
+      navLinks.classList.toggle("open");
+      menuBtn.classList.toggle("active");
+    });
 
-    async function fetchBooks() {
-      const grid = document.getElementById("book-grid");
-      const noRes = document.getElementById("no-results");
+    // ── Sticky nav shadow on scroll ───────────────────────────────────
+    window.addEventListener("scroll", () => {
+      document.getElementById("site-nav").classList.toggle("scrolled", window.scrollY > 10);
+    });
 
-      try {
-        const q = query(collection(db, "books"), orderBy("createdAt", "desc"));
-        const snap = await getDocs(q);
-        
-        BOOKS = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        
-        if (BOOKS.length === 0) {
-          // Fallback if DB is empty: use a few demo books
-          BOOKS = [
-            { id:"b1", title:"The Midnight Library", author:"Matt Haig", category:"Fiction", price:129, originalPrice:499, cover:"https://covers.openlibrary.org/b/id/10527843-L.jpg", condition:"Good" },
-            { id:"b2", title:"Atomic Habits", author:"James Clear", category:"Self-Help", price:159, originalPrice:599, cover:"https://covers.openlibrary.org/b/id/10286124-L.jpg", condition:"Like New" }
-          ];
+    // ── Auth state ────────────────────────────────────────────────────
+    initAuthState((user) => {
+      const emailSpan = document.getElementById("user-email");
+      const adminLink = document.getElementById("admin-link");
+      const dashboardLink = document.getElementById("dashboard-link");
+      const authBtn = document.getElementById("auth-btn");
+
+      if (user) {
+        emailSpan.textContent = user.name;
+        dashboardLink.classList.remove("hidden");
+        if (user.role === "admin" || user.email === "admin@dustyshelf.com") {
+          adminLink.classList.remove("hidden");
         }
-        
+        authBtn.onclick = async () => { await logOut(); window.location.reload(); };
+        migrateOldCart();
+        updateCartBadge();
+        // Re-render to update interactive stars
         renderBooks();
-      } catch (err) {
-        console.error("Error fetching books:", err);
-        // Load fallback data if Firebase fails (missing keys)
-        renderBooks();
+      } else {
+        emailSpan.textContent = "Login";
+        adminLink.classList.add("hidden");
+        dashboardLink.classList.add("hidden");
+        authBtn.onclick = () => { window.location.href = "login.html"; };
+        updateCartBadge();
       }
+    });
+
+    // ── Cart handler ──────────────────────────────────────────────────
+    function handleAddToCart(book) {
+      const result = addToCartModule(book);
+      if (!result.success) {
+        if (result.redirect) window.location.href = result.redirect;
+        return;
+      }
+      showToast(result.message, "success");
+      updateCartBadge();
     }
 
-    const CATEGORIES = ["All", "Fiction", "Classic", "Non-Fiction", "Self-Help", "Fantasy", "Sci-Fi", "Academic", "Biography"];
+    updateCartBadge();
 
-    // ── State ─────────────────────────────────────────────────────────────────
+    // ── Category filter ───────────────────────────────────────────────
+    const catContainer = document.getElementById("categories");
+    const allCats = ["All", ...new Set(BOOKS.map(b => b.category))];
     let activeCategory = "All";
     let searchQuery = "";
 
-    const storedUser = JSON.parse(localStorage.getItem("user"));
-    if(storedUser){
-      document.getElementById("user-email").textContent = storedUser.email.split('@')[0];
-      if(storedUser.email === "admin@dustyshelf.com") {
-        document.getElementById("admin-link").classList.remove("hidden");
-      }
-    }
-
-    function logout(){
-      localStorage.removeItem("loggedIn");
-      alert("Logged out!");
-      window.location.href = "login.html";
-    }
-
-    function getCart(){ return JSON.parse(localStorage.getItem("dustyshelf_cart") || "[]"); }
-    function saveCart(cart){ localStorage.setItem("dustyshelf_cart", JSON.stringify(cart)); updateCartBadge(); }
-
-    function addToCart(book){
-      const cart = getCart();
-      const idx = cart.findIndex(i => i.id === book.id);
-      if(idx > -1){ cart[idx].qty += 1; }
-      else { cart.push({ ...book, qty:1 }); }
-      saveCart(cart);
-      alert(`"${book.title}" added to your collection!`);
-    }
-
-    function updateCartBadge(){
-      const cart = getCart();
-      const badge = document.getElementById("cart-badge");
-      const count = cart.reduce((s,i) => s + i.qty, 0);
-      if(count > 0){ badge.style.display = "flex"; badge.textContent = count; }
-      else { badge.style.display = "none"; }
-    }
-    updateCartBadge();
-
-    // ── Categories ────────────────────────────────────────────────────────────
-    const catContainer = document.getElementById("categories");
-    CATEGORIES.forEach(label => {
+    allCats.forEach(label => {
       const btn = document.createElement("button");
-      btn.className = `shrink-0 text-xs font-bold uppercase tracking-widest px-6 py-2 rounded-full border transition-all ${label === "All" ? "bg-forest text-parchment border-forest" : "text-clay border-transparent hover:text-ink"}`;
+      btn.className = `cat-pill${label === "All" ? " cat-pill--active" : ""}`;
       btn.textContent = label;
       btn.addEventListener("click", () => {
-        document.querySelectorAll("#categories button").forEach(b => {
-          b.className = "shrink-0 text-xs font-bold uppercase tracking-widest px-6 py-2 rounded-full border border-transparent text-clay hover:text-ink transition-all";
-        });
-        btn.className = "shrink-0 text-xs font-bold uppercase tracking-widest px-6 py-2 rounded-full border bg-forest text-parchment border-forest";
+        document.querySelectorAll(".cat-pill").forEach(b => b.classList.remove("cat-pill--active"));
+        btn.classList.add("cat-pill--active");
         activeCategory = label;
         renderBooks();
       });
       catContainer.appendChild(btn);
     });
 
-    // ── Search ────────────────────────────────────────────────────────────────
-    document.getElementById("search-input").addEventListener("input", (e) => {
-      searchQuery = e.target.value.toLowerCase(); renderBooks();
+    // ── Search ────────────────────────────────────────────────────────
+    document.getElementById("search-input").addEventListener("input", e => {
+      searchQuery = e.target.value.toLowerCase();
+      renderBooks();
     });
 
-    // ── Render books ──────────────────────────────────────────────────────────
-    function renderBooks(){
+    // ── Product Modal ─────────────────────────────────────────────────
+    const modal = document.getElementById("product-modal");
+    const modalBody = document.getElementById("modal-body");
+    document.getElementById("modal-close").addEventListener("click", () => modal.classList.add("hidden"));
+    modal.addEventListener("click", (e) => { if (e.target === modal) modal.classList.add("hidden"); });
+
+    function openProductModal(book) {
+      const { avg, count } = getBookRating(book.id, book.rating);
+      const userRating = getUserBookRating(book.id);
+      const discount = Math.round(((book.originalPrice - book.price) / book.originalPrice) * 100);
+      const user = getCurrentUser();
+
+      modalBody.innerHTML = `
+        <div class="modal-grid">
+          <div class="modal-img">
+            <img src="${book.cover}" alt="${book.title}" onerror="this.src='https://via.placeholder.com/400x600/1A3C34/FDFCF8?text=📚'" />
+            <span class="badge badge--condition">${book.condition}</span>
+          </div>
+          <div class="modal-info">
+            <span class="modal-category">${book.category}</span>
+            <h2 class="modal-title">${book.title}</h2>
+            <p class="modal-author">by ${book.author}</p>
+            <div class="rating-row">
+              <span class="stars-display">${renderStars(avg)}</span>
+              <span class="rating-text">${avg} (${count} ${count === 1 ? 'rating' : 'ratings'})</span>
+            </div>
+            <p class="modal-desc">${book.description}</p>
+            <div class="price-block">
+              <span class="price-now">₹${book.price}</span>
+              <span class="price-was">₹${book.originalPrice}</span>
+              <span class="price-off">${discount}% off</span>
+            </div>
+            <button class="btn btn-primary btn-full modal-add-btn" data-id="${book.id}">Add to Cart</button>
+            ${user ? `
+              <div class="rate-section">
+                <p class="rate-label">Rate this book:</p>
+                ${renderInteractiveStars(book.id, userRating)}
+              </div>
+            ` : `<p class="rate-login-hint">Log in to rate this book</p>`}
+          </div>
+        </div>
+      `;
+
+      // Bind add-to-cart inside modal
+      modalBody.querySelector(".modal-add-btn")?.addEventListener("click", () => handleAddToCart(book));
+
+      // Bind interactive stars inside modal
+      modalBody.querySelectorAll(".rate-star").forEach(star => {
+        star.addEventListener("click", () => {
+          const stars = parseInt(star.dataset.star);
+          const result = rateBook(book.id, stars, book.rating);
+          if (result) {
+            showToast(`Rated "${book.title}" ${stars} star${stars > 1 ? 's' : ''}!`, "success");
+            openProductModal(book); // Re-render modal
+            renderBooks(); // Update grid card too
+          }
+        });
+      });
+
+      modal.classList.remove("hidden");
+    }
+
+    // ── Render Books Grid ─────────────────────────────────────────────
+    function renderBooks() {
       const grid = document.getElementById("book-grid");
       const noRes = document.getElementById("no-results");
 
@@ -325,40 +318,72 @@
         return matchCat && matchSearch;
       });
 
-      if(!filtered.length){ grid.innerHTML = ""; noRes.classList.remove("hidden"); return; }
+      if (!filtered.length) { grid.innerHTML = ""; noRes.classList.remove("hidden"); return; }
       noRes.classList.add("hidden");
 
-      grid.innerHTML = filtered.map(book => `
-        <div class="book-card group cursor-pointer">
-          <div class="relative aspect-[3/4] overflow-hidden rounded-2xl bg-gray-50 mb-6">
-            <img src="${book.cover}" alt="${book.title}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale-[0.3] group-hover:grayscale-0" onerror="this.src='https://via.placeholder.com/400x600/FDFCF8/1A3C34?text=📚'" />
-            <div class="absolute inset-0 bg-forest/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-              <button class="add-btn bg-parchment text-forest px-6 py-3 rounded-full text-xs font-bold uppercase tracking-widest hover:scale-105 transition-all shadow-xl" data-id="${book.id}">
-                Add to Cart
+      grid.innerHTML = filtered.map(book => {
+        const { avg, count } = getBookRating(book.id, book.rating);
+        const discount = Math.round(((book.originalPrice - book.price) / book.originalPrice) * 100);
+        return `
+        <div class="book-card" data-id="${book.id}">
+          <div class="book-card__img-wrap">
+            <img src="${book.cover}" alt="${book.title}" onerror="this.src='https://via.placeholder.com/400x600/1A3C34/FDFCF8?text=📚'" />
+            <span class="badge badge--discount">-${discount}%</span>
+            <span class="badge badge--condition">${book.condition}</span>
+            <div class="book-card__overlay">
+              <button class="btn btn-sm btn-white quick-view-btn" data-id="${book.id}">Quick View</button>
+            </div>
+          </div>
+          <div class="book-card__body">
+            <span class="book-card__category">${book.category}</span>
+            <h3 class="book-card__title">${book.title}</h3>
+            <p class="book-card__author">${book.author}</p>
+            <p class="book-card__desc">${book.description}</p>
+            <div class="book-card__rating">
+              <span class="stars-display">${renderStars(avg, "text-xs")}</span>
+              <span class="rating-count">(${count})</span>
+            </div>
+            <div class="book-card__footer">
+              <div class="book-card__price">
+                <span class="price-now">₹${book.price}</span>
+                <span class="price-was">₹${book.originalPrice}</span>
+              </div>
+              <button class="add-btn" data-id="${book.id}" title="Add to Cart">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="18" height="18"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
               </button>
             </div>
           </div>
-          <div class="text-center">
-            <h3 class="serif text-xl font-bold text-forest line-clamp-1 mb-1">${book.title}</h3>
-            <p class="text-clay italic text-xs mb-3">${book.author}</p>
-            <div class="flex items-center justify-center gap-2">
-              <span class="text-ink font-semibold">₹${book.price}</span>
-              <span class="text-clay/50 text-[10px] line-through font-bold uppercase">₹${book.originalPrice}</span>
-            </div>
-          </div>
-        </div>
-      `).join("");
+        </div>`;
+      }).join("");
 
+      // Bind add-to-cart
       grid.querySelectorAll(".add-btn").forEach(btn => {
-        btn.addEventListener("click", (e) => {
+        btn.addEventListener("click", e => {
           e.stopPropagation();
           const book = BOOKS.find(b => b.id === btn.dataset.id);
-          if(book) addToCart(book);
+          if (book) handleAddToCart(book);
+        });
+      });
+
+      // Bind quick view
+      grid.querySelectorAll(".quick-view-btn").forEach(btn => {
+        btn.addEventListener("click", e => {
+          e.stopPropagation();
+          const book = BOOKS.find(b => b.id === btn.dataset.id);
+          if (book) openProductModal(book);
+        });
+      });
+
+      // Bind card click -> modal
+      grid.querySelectorAll(".book-card").forEach(card => {
+        card.addEventListener("click", () => {
+          const book = BOOKS.find(b => b.id === card.dataset.id);
+          if (book) openProductModal(book);
         });
       });
     }
 
-    fetchBooks();
+    renderBooks();
   </script>
 
 </body>

@@ -3,100 +3,116 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Your curated book collection — review and checkout your DustyShelf cart." />
   <title>Your Collection — DustyShelf</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: { parchment: '#FDFCF8', ink: '#1A1A1A', forest: '#1A3C34', gold: '#B8860B', clay: '#7D6B5D' },
-          fontFamily: { serif: ['"Playfair Display"', 'serif'], sans: ['Inter', 'sans-serif'] }
-        }
-      }
-    }
-  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/main.css" />
 </head>
 
-<body class="bg-parchment text-ink min-h-screen">
-  <!-- Page protection -->
-  <script>
-    if(localStorage.getItem("loggedIn") !== "true"){
-      window.location.href = "login.html";
-    }
-  </script>
+<body>
 
   <!-- Navigation -->
-  <nav class="bg-parchment border-b border-gray-100">
-    <div class="max-w-5xl mx-auto px-6 h-20 flex items-center justify-between">
-      <a href="index.html" class="serif text-xl font-black tracking-tighter">Dusty<span class="italic font-normal">Shelf</span></a>
-      <a href="index.html" class="text-[10px] font-black uppercase tracking-widest text-clay hover:text-ink transition-colors">← Keep Browsing</a>
+  <nav class="site-nav" id="site-nav">
+    <div class="nav-inner">
+      <a href="index.html" class="logo">
+        <span class="logo-icon">📖</span>
+        <span class="logo-text">Dusty<span class="logo-italic">Shelf</span></span>
+      </a>
+      <div class="nav-actions">
+        <a href="index.html" class="btn btn-ghost btn-sm">← Keep Browsing</a>
+      </div>
     </div>
   </nav>
 
-  <main class="max-w-5xl mx-auto px-6 py-16">
-    <div class="mb-12">
-      <h1 class="serif text-5xl font-bold text-forest mb-2">Your Collection</h1>
-      <p class="text-clay italic">Review the items you've curated for purchase.</p>
+  <main class="cart-page">
+    <div class="cart-header">
+      <h1 class="page-title">Your Collection</h1>
+      <p class="page-subtitle">Review the items you've curated for purchase.</p>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-16">
-      
-      <!-- List -->
-      <div class="lg:col-span-2 space-y-10">
-        <div id="cart-items" class="divide-y divide-gray-100"></div>
-        
-        <div id="empty-cart" class="hidden py-20 text-center bg-white/50 rounded-[2rem] border border-gray-100">
-          <p class="serif italic text-2xl text-clay mb-6">Your collection is empty.</p>
-          <a href="index.html" class="bg-forest text-parchment px-10 py-4 rounded-full font-bold text-xs uppercase tracking-widest shadow-xl shadow-forest/10">Browse the Library</a>
+    <div class="cart-layout">
+      <!-- Cart Items List -->
+      <div class="cart-items-col">
+        <div id="cart-items" class="cart-items-list"></div>
+
+        <div id="empty-cart" class="empty-cart hidden">
+          <div class="empty-cart-icon">📚</div>
+          <p class="empty-cart-title">Your collection is empty.</p>
+          <p class="empty-cart-sub">Looks like you haven't added any books yet.</p>
+          <a href="index.html" class="btn btn-primary">Browse the Library</a>
         </div>
       </div>
 
-      <!-- Summary -->
-      <div id="order-summary" class="hidden">
-        <div class="bg-white p-8 rounded-[2rem] border border-gray-100 shadow-sm sticky top-8">
-          <h2 class="serif text-2xl font-bold text-forest mb-6">Summary</h2>
-          <div class="space-y-4 text-sm mb-8">
-            <div class="flex justify-between text-clay">
-              <span>Subtotal</span>
-              <span id="subtotal" class="text-ink font-bold">₹0</span>
+      <!-- Order Summary Sidebar -->
+      <div id="order-summary" class="order-summary hidden">
+        <div class="summary-card">
+          <h2 class="summary-title">Order Summary</h2>
+          
+          <div class="summary-rows">
+            <div class="summary-row">
+              <span>Items (<span id="item-count">0</span>)</span>
+              <span id="subtotal" class="summary-val">₹0</span>
             </div>
-            <div class="flex justify-between text-clay">
-              <span>Curation & Shipping</span>
-              <span class="text-forest font-bold uppercase text-[10px] tracking-widest">Complimentary</span>
+            <div class="summary-row">
+              <span>Savings</span>
+              <span id="savings" class="summary-val summary-val--green">-₹0</span>
             </div>
-            <div class="border-t border-gray-50 pt-4 flex justify-between text-xl font-bold text-forest">
-              <span>Total</span>
-              <span id="total">₹0</span>
+            <div class="summary-row">
+              <span>Shipping</span>
+              <span class="summary-val summary-val--free">FREE</span>
             </div>
           </div>
-          <a href="checkout.html" class="block w-full text-center bg-forest text-parchment py-4 rounded-full font-bold text-xs uppercase tracking-widest hover:scale-[1.02] transition-all shadow-xl shadow-forest/10">
-            Secure Checkout
+
+          <div class="summary-total">
+            <span>Total</span>
+            <span id="total">₹0</span>
+          </div>
+
+          <a href="checkout.html" id="checkout-btn" class="btn btn-primary btn-full">
+            Proceed to Checkout
           </a>
-          <p class="text-center text-[10px] text-clay/60 uppercase tracking-widest font-bold mt-6 italic">Secure payment processing</p>
+
+          <div class="summary-secure">
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" width="14" height="14"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            <span>Secure checkout · SSL encrypted</span>
+          </div>
         </div>
       </div>
-
     </div>
   </main>
 
-  <script>
-    function getCart(){ return JSON.parse(localStorage.getItem("dustyshelf_cart") || "[]"); }
-    function saveCart(cart){ localStorage.setItem("dustyshelf_cart", JSON.stringify(cart)); render(); }
+  <script type="module">
+    import { requireAuth } from "./js/auth.js";
+    import { getCart, saveCart, removeFromCart, updateQty as cartUpdateQty } from "./js/cart.js";
+    import { showToast } from "./js/toast.js";
+    import { BOOKS } from "./js/books.js";
 
-    function render(){
+    // Protect page
+    requireAuth();
+
+    function render() {
       const cart = getCart();
       const itemsEl = document.getElementById("cart-items");
       const emptyEl = document.getElementById("empty-cart");
       const summaryEl = document.getElementById("order-summary");
 
-      const total = cart.reduce((s,i) => s + i.price * i.qty, 0);
-      document.getElementById("subtotal").textContent = `₹${total}`;
-      document.getElementById("total").textContent = `₹${total}`;
+      const subtotal = cart.reduce((s, i) => s + i.price * i.qty, 0);
+      const totalItems = cart.reduce((s, i) => s + i.qty, 0);
+      // Calculate savings from original prices
+      const originalTotal = cart.reduce((s, i) => {
+        const orig = i.originalPrice || i.price;
+        return s + orig * i.qty;
+      }, 0);
+      const savings = originalTotal - subtotal;
 
-      if(!cart.length){
+      document.getElementById("subtotal").textContent = `₹${subtotal.toLocaleString("en-IN")}`;
+      document.getElementById("total").textContent = `₹${subtotal.toLocaleString("en-IN")}`;
+      document.getElementById("item-count").textContent = totalItems;
+      document.getElementById("savings").textContent = `-₹${savings.toLocaleString("en-IN")}`;
+
+      if (!cart.length) {
         emptyEl.classList.remove("hidden");
         summaryEl.classList.add("hidden");
         itemsEl.innerHTML = "";
@@ -106,48 +122,52 @@
       emptyEl.classList.add("hidden");
       summaryEl.classList.remove("hidden");
 
-      itemsEl.innerHTML = cart.map(item => `
-        <div class="py-8 flex gap-8 group">
-          <div class="w-24 aspect-[3/4] bg-gray-50 rounded-xl overflow-hidden shadow-md shrink-0">
-            <img src="${item.cover}" class="w-full h-full object-cover grayscale-[0.2]" onerror="this.src='https://via.placeholder.com/200x300/FDFCF8/1A3C34?text=📚'" />
+      itemsEl.innerHTML = cart.map((item, idx) => `
+        <div class="cart-item ${idx === 0 ? '' : 'cart-item--bordered'}">
+          <div class="cart-item__img">
+            <img src="${item.cover}" alt="${item.title}" onerror="this.src='https://via.placeholder.com/200x300/FDFCF8/1A3C34?text=Book'" />
           </div>
-          <div class="flex-1 flex flex-col justify-between">
-            <div class="flex justify-between items-start">
+          <div class="cart-item__details">
+            <div class="cart-item__top">
               <div>
-                <h3 class="serif text-xl font-bold text-forest mb-1">${item.title}</h3>
-                <p class="text-clay italic text-sm">${item.author}</p>
+                <h3 class="cart-item__title">${item.title}</h3>
+                <p class="cart-item__author">by ${item.author}</p>
+                <p class="cart-item__condition">${item.condition || 'Good'} condition</p>
               </div>
-              <button onclick="removeItem('${item.id}')" class="text-clay hover:text-red-400 transition-colors p-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M6 18L18 6M6 6l12 12"/></svg>
+              <button data-action="remove" data-id="${item.id}" class="cart-item__remove" title="Remove item">
+                <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
               </button>
             </div>
-            <div class="flex items-center justify-between mt-6">
-              <div class="flex items-center gap-4 bg-white px-4 py-2 rounded-full border border-gray-100">
-                <button onclick="updateQty('${item.id}', -1)" class="text-clay hover:text-ink font-bold">−</button>
-                <span class="text-sm font-bold w-4 text-center">${item.qty}</span>
-                <button onclick="updateQty('${item.id}', 1)" class="text-clay hover:text-ink font-bold">+</button>
+            <div class="cart-item__bottom">
+              <div class="qty-control">
+                <button data-action="decrease" data-id="${item.id}" class="qty-btn" ${item.qty <= 1 ? 'disabled' : ''}>−</button>
+                <span class="qty-value">${item.qty}</span>
+                <button data-action="increase" data-id="${item.id}" class="qty-btn">+</button>
               </div>
-              <p class="serif text-xl font-bold text-forest">₹${item.price * item.qty}</p>
+              <div class="cart-item__pricing">
+                <span class="cart-item__total">₹${(item.price * item.qty).toLocaleString("en-IN")}</span>
+                ${item.qty > 1 ? `<span class="cart-item__unit">₹${item.price} each</span>` : ''}
+              </div>
             </div>
           </div>
         </div>
       `).join("");
+
+      // Event delegation for cart actions
+      document.querySelectorAll('button[data-action="remove"]').forEach(btn => {
+        btn.onclick = () => {
+          removeFromCart(btn.dataset.id);
+          showToast("Item removed from cart", "info");
+          render();
+        };
+      });
+      document.querySelectorAll('button[data-action="decrease"]').forEach(btn => {
+        btn.onclick = () => { cartUpdateQty(btn.dataset.id, -1); render(); };
+      });
+      document.querySelectorAll('button[data-action="increase"]').forEach(btn => {
+        btn.onclick = () => { cartUpdateQty(btn.dataset.id, 1); render(); };
+      });
     }
-
-    window.removeItem = (id) => {
-      const cart = getCart().filter(i => i.id !== id);
-      saveCart(cart);
-    };
-
-    window.updateQty = (id, delta) => {
-      const cart = getCart();
-      const item = cart.find(i => i.id === id);
-      if(item){
-        item.qty += delta;
-        if(item.qty < 1) return removeItem(id);
-        saveCart(cart);
-      }
-    };
 
     render();
   </script>

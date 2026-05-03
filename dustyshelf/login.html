@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login — DustyShelf</title>
+  <meta name="description" content="Sign in to your DustyShelf account to access your curated collection and order history." />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
@@ -18,72 +19,117 @@
       }
     }
   </script>
+  <style>
+    .serif { font-family: 'Playfair Display', serif; }
+    .field-input {
+      transition: border-color 0.3s, box-shadow 0.3s;
+      border-bottom: 1.5px solid #e5e7eb;
+    }
+    .field-input:focus { border-color: #B8860B; box-shadow: 0 2px 0 0 #B8860B; }
+    .field-input.invalid { border-color: #dc2626; }
+    .btn-loading { pointer-events: none; opacity: 0.8; }
+    .btn-loading::after {
+      content: ''; display: inline-block; width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3); border-top-color: white;
+      border-radius: 50%; margin-left: 10px; vertical-align: middle;
+      animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .shake { animation: shake 0.4s ease; }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+  </style>
 </head>
 
 <body class="bg-parchment text-ink min-h-screen flex flex-col md:flex-row">
 
-  <!-- Left: Aesthetics -->
+  <!-- Left Panel: Decorative -->
   <div class="hidden md:flex md:w-1/2 bg-forest relative overflow-hidden items-center justify-center p-12">
     <div class="relative z-10 text-center">
       <h2 class="serif text-parchment text-6xl font-bold leading-tight mb-6">Welcome back to <br/><span class="italic font-normal">the library.</span></h2>
       <p class="text-parchment/60 font-sans tracking-widest uppercase text-xs font-bold">Curated Classics Since 2024</p>
     </div>
-    <!-- Decorative texture -->
     <div class="absolute inset-0 opacity-10" style="background-image: url('https://www.transparenttextures.com/patterns/paper.png');"></div>
     <div class="absolute -bottom-20 -left-20 w-80 h-80 bg-gold/20 rounded-full blur-3xl"></div>
+    <div class="absolute -top-32 -right-32 w-96 h-96 bg-parchment/5 rounded-full blur-3xl"></div>
   </div>
 
-  <!-- Right: Form -->
-  <div class="flex-1 flex items-center justify-center p-8 bg-parchment">
-    <div class="max-w-sm w-full">
-      <div class="text-center md:text-left mb-12">
-        <a href="index.html" class="serif text-3xl font-black tracking-tighter mb-8 inline-block">Dusty<span class="italic font-normal">Shelf</span></a>
-        <h3 class="serif text-4xl font-bold text-forest mb-2">Member Login</h3>
+  <!-- Right Panel: Login Form -->
+  <div class="flex-1 flex items-center justify-center p-6 sm:p-8 bg-parchment">
+    <div class="max-w-[380px] w-full">
+      <div class="text-center md:text-left mb-10">
+        <a href="index.html" class="serif text-3xl font-black tracking-tighter mb-6 inline-block">Dusty<span class="italic font-normal">Shelf</span></a>
+        <h3 class="serif text-3xl sm:text-4xl font-bold text-forest mb-2">Member Login</h3>
         <p class="text-clay text-sm">Access your curated collection and history.</p>
       </div>
 
+      <!-- Message containers -->
+      <div id="error-msg" class="hidden mb-4 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-2xl text-sm font-medium"></div>
+      <div id="success-msg" class="hidden mb-4 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-2xl text-sm font-medium"></div>
+
       <div class="space-y-6">
+        <!-- Email -->
         <div>
           <label class="block text-[10px] font-black uppercase tracking-widest text-clay mb-2">Email Address</label>
-          <input id="email" type="email" placeholder="email@example.com" class="w-full bg-transparent border-b border-gray-200 py-3 text-sm outline-none focus:border-gold transition-all" />
+          <input id="email" type="email" placeholder="email@example.com" autocomplete="email"
+            class="field-input w-full bg-transparent py-3 text-sm outline-none" />
         </div>
+        
+        <!-- Password -->
         <div>
           <label class="block text-[10px] font-black uppercase tracking-widest text-clay mb-2">Password</label>
-          <input id="password" type="password" placeholder="••••••••" class="w-full bg-transparent border-b border-gray-200 py-3 text-sm outline-none focus:border-gold transition-all" />
+          <div class="relative">
+            <input id="password" type="password" placeholder="Enter your password" autocomplete="current-password"
+              class="field-input w-full bg-transparent py-3 text-sm outline-none pr-10" />
+            <button type="button" id="togglePwd" class="absolute right-0 top-1/2 -translate-y-1/2 text-clay hover:text-ink transition-colors p-1">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+            </button>
+          </div>
         </div>
 
-        <button onclick="login()" class="w-full bg-forest text-parchment py-4 rounded-full font-bold text-xs uppercase tracking-widest hover:bg-ink transition-all shadow-xl shadow-forest/10 mt-4">
+        <!-- Forgot Password -->
+        <div class="text-right -mt-3">
+          <button id="forgotPwdBtn" type="button" class="text-xs text-gold font-bold hover:underline">Forgot Password?</button>
+        </div>
+
+        <!-- Login Button -->
+        <button id="loginBtn" class="w-full bg-forest text-parchment py-4 rounded-full font-bold text-xs uppercase tracking-widest hover:bg-ink transition-all shadow-xl shadow-forest/10 flex items-center justify-center">
           Sign In
         </button>
 
-        <p class="text-center text-xs text-clay font-medium pt-4">
+        <!-- Google Login -->
+        <button id="googleLoginBtn" class="w-full bg-white border border-gray-200 text-ink py-4 rounded-full font-bold text-xs uppercase tracking-widest hover:bg-gray-50 transition-all shadow-md flex items-center justify-center gap-2">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          Sign in with Google
+        </button>
+
+        <p class="text-center text-xs text-clay font-medium pt-2">
           Not a member yet? <a href="signup.html" class="text-gold font-bold hover:underline">Create an account</a>
         </p>
       </div>
     </div>
   </div>
 
-<script>
-function login(){
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
+  <!-- Forgot Password Modal -->
+  <div id="forgot-modal" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-parchment rounded-3xl max-w-sm w-full p-8 shadow-2xl">
+      <h3 class="serif text-2xl font-bold text-forest mb-2">Reset Password</h3>
+      <p class="text-clay text-sm mb-6">Enter your email address and we'll send a password reset link.</p>
+      <input id="reset-email" type="email" placeholder="your@email.com" class="field-input w-full bg-transparent py-3 text-sm outline-none mb-6" />
+      <button id="sendResetBtn" class="w-full bg-forest text-parchment py-4 rounded-full font-bold text-xs uppercase tracking-widest hover:bg-ink transition-all flex items-center justify-center">
+        Send Reset Link
+      </button>
+      <button id="closeResetModal" class="w-full mt-3 text-clay text-xs font-bold uppercase tracking-widest hover:text-ink transition-colors py-2">
+        Cancel
+      </button>
+    </div>
+  </div>
 
-  const storedUser = JSON.parse(localStorage.getItem("user"));
-
-  if(!storedUser){
-    alert("No account found! Please signup first.");
-    return;
-  }
-
-  if(email === storedUser.email && password === storedUser.password){
-    localStorage.setItem("loggedIn", "true");
-    window.location.href = "index.html";
-  } 
-  else {
-    alert("Invalid Email or Password");
-  }
-}
-</script>
+<script type="module" src="./js/login.js"></script>
 
 </body>
 </html>

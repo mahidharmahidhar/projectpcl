@@ -32,6 +32,13 @@ const User = sequelize.define('User', {
         type: DataTypes.STRING,
         unique: true,
         allowNull: true
+    },
+    upiId: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        validate: {
+            isEmail: false // UPI IDs can be like mobile@upi or name@bank
+        }
     }
 }, {
     hooks: {
@@ -44,7 +51,7 @@ const User = sequelize.define('User', {
     }
 });
 
-User.prototype.matchPassword = async function(enteredPassword) {
+User.prototype.matchPassword = async function (enteredPassword) {
     if (!this.password) return false;
     return await bcrypt.compare(enteredPassword, this.password);
 };
