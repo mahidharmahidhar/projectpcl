@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const dotenv = require('dotenv');
 const cors = require('cors');
 const { connectDB } = require('./config/db');
@@ -22,20 +23,24 @@ app.use(express.json());
 // Enable CORS
 app.use(cors());
 
-// Root route
-app.get('/', (req, res) => {
-    res.json({ message: 'DustyShelf API is running...' });
-});
+// ── Serve static frontend files from ../dustyshelf ──────────────────────────
+const frontendPath = path.join(__dirname, '..', 'dustyshelf');
+app.use(express.static(frontendPath));
 
-// Mount routers
+// Mount API routers
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/books', require('./routes/bookRoutes'));
 app.use('/api/cart', require('./routes/cartRoutes'));
 app.use('/api/orders', require('./routes/orderRoutes'));
 app.use('/api/payment', require('./routes/paymentRoutes'));
 
-// Error handler
-app.use(errorHandler);
+// Error handler (for API errors)
+app.use('/api', errorHandler);
+
+// ── Catch-all: serve index.html for any non-API route ───────────────────────
+app.get('*', (req, res) => {
+    res.sendFile(path.join(frontendPath, 'index.html'));
+});
 
 const PORT = process.env.PORT || 5000;
 
